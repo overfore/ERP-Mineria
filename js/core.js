@@ -337,7 +337,7 @@ H.wizard = (el, o) => {
 };
 
 /* ---------- Gráficos SVG (barras, líneas, área, anillo, apilado, dispersión, calor, medidor, chispa) ---------- */
-const PAL = ['#1E2B35', '#9C4A1F', '#1F7A5C', '#6C8294', '#C9A27A', '#7E3A16'];
+const PAL = ['#1E2B35', '#9C4A1F', '#1F7A5C', '#6C8294', '#8A6A3E', '#7E3A16'];
 H.PAL = PAL;
 const niceMax = (m) => { if (m <= 0) return 1; const p = Math.pow(10, Math.floor(Math.log10(m))); const f = m / p; const n = f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10; return n * p; };
 const svgW = (w, h, label, inner) => `<svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(label)}" preserveAspectRatio="xMidYMid meet">${inner}</svg>`;

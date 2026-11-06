@@ -32,13 +32,13 @@ Una aplicación web de una sola página (HTML, CSS y JavaScript puros, sin depen
 - **9 perfiles de usuario** con menú, inicio y permisos propios: operador de pala, supervisor de turno, planificación, metalurgia, seguridad, sustentabilidad, contratista, gerencia y administración TI. Si un perfil entra a una sección que no le corresponde, ve "Acceso restringido": es el control de acceso por roles.
 - **Trazabilidad de lotes** de la mina al embarque, con reconstrucción del origen de cada lote, ciclo completo y una excepción por arsénico.
 - **Conciliación metalúrgica**, plan minero con versiones, y flota de equipos con detenciones.
-- **Centro de control**: despacho de palas y camiones en movimiento, mapa del rajo, geotecnia, modelo 3D por bloques y arquitectura isométrica equipo → borde → nube.
+- **Centro de control**: despacho de palas y camiones en movimiento, mapa del rajo, geotecnia, modelo 3D por bloques y arquitectura isométrica equipo → Nodo de Faena → nube.
 - **Acreditación de personas**, seguridad y fatiga, ambiental y huella de carbono, y gestión de terceros.
 - **Tablero analítico** con filtros, exportación simulada y desglose por indicador.
 - **Terreno**: dos vistas.
   - **Operador de pala: la Botonera de Pala**, como la Figura 3.10 del Subdocumento 3. Cuatro botones de destino (planta, baja ley, estéril y borde), una luz que marca el destino del plan y el toque de credencial al inicio del turno. No hay pantalla, formularios ni PIN. Los registros se guardan sin señal y se envían al volver el enlace.
-  - **Supervisor de turno: tableta rugerizada**, con incidentes, inspecciones firmadas y clasificación de detenciones.
-- **Conectividad y nube**: cola de sincronización, bitácora y simulador de corte.
+  - **Supervisor de turno: tableta rugerizada**, con incidentes (hora del hecho y hora de registro por separado), inspecciones con firma, aviso de falla a SAP en tres acciones y clasificación de detenciones.
+- **Conectividad y nube**: cola de sincronización, bitácora y simulador de corte con los tres caminos del Subdocumento 3: fibra A, fibra B (otro proveedor y camino) y satélite de órbita baja. El modo local solo se activa si caen los tres; el satélite geoestacionario existente queda para telefonía y correo.
 - **Administración**: usuarios, matriz de roles con conflictos de segregación de funciones, parámetros y auditoría.
 - **Documentación del prototipo**: arquitectura de información y sistema de diseño.
 
@@ -74,7 +74,7 @@ Decidimos **simular** en vez de construir un sistema real, porque lo que se eval
 | RT-25.08 Interactividad simulada | Sí: navegación completa, ingreso y validación simulados, carga de archivos, desplegables y estados. |
 | RT-25.09 Arquitectura de información | Sí: pantalla `/arquitectura-informacion` con mapa del sitio, diagrama de navegación, taxonomía y menús por perfil. |
 | RT-25.10 Exportación a documento interactivo (deseable) | No. |
-| Criterio 13 | El simulador de nube muestra la operación local desde el borde de faena durante hasta 48 h y la sincronización automática al volver el enlace. |
+| Criterio 13 | El simulador de nube muestra la operación local desde el Nodo de Faena durante hasta 48 h y la sincronización automática al volver el enlace. |
 | Criterio 14 | La botonera registra el cambio de destino con un toque en el botón de destino, sin teclear ni pantalla táctil. |
 | Componentes del 25.4: información contextual emergente | Sí: ayudas con globo en indicadores con línea base, en el límite de arsénico y en la autonomía sin enlace. Se abren con el mouse o el teclado y se cierran con Esc. |
 
@@ -99,7 +99,7 @@ css/styles.css      Sistema de diseño y componentes
 css/control.css     Estilos del centro de control
 js/core.js          Utilidades, componentes, validaciones y gráficos
 js/data.js          Datos de demostración, perfiles y menú
-js/sim.js           Simulación de conectividad (equipo → borde → nube)
+js/sim.js           Simulación de conectividad (equipo → Nodo de Faena → nube)
 js/app.js           Enrutador, estructura general y recorrido guiado
 js/views-*.js       Pantallas por área (públicas, operación, personas, administración, documentación, centro de control)
 ```
@@ -126,11 +126,18 @@ Acordados el 5 de noviembre de 2026. Se harán en la versión Angular.
 
 ## Cambios acordados ya implementados
 
-Hechos el 5 de noviembre de 2026 en este código.
+Hechos el 5 y 6 de noviembre de 2026 en este código.
 
-- **Botonera de Pala** como en la Figura 3.10 del Subdocumento 3: cuatro botones de destino, luz del plan, luces de estado y toque de credencial simulado, sin PIN ni pantalla. Se quitaron "Detención" y "Aviso de falla" de la vista del operador (RNF-USA-008 y RNF-USA-009); las detenciones se clasifican en la vista del supervisor.
-- **Login:** el flujo de credencial más PIN entra como supervisor, no como operador. El operador no inicia sesión.
-- **Textos** que decían que el operador ve "un botón" o "cero pasos extra para ti": ajustados.
+- **Botonera de Pala** como en la Figura 3.10 del Subdocumento 3: cuatro botones de destino, luz del plan, luz de registrado y toque de credencial simulado, sin PIN ni pantalla. Se quitaron "Detención" y "Aviso de falla" de la vista del operador (RNF-USA-008 y RNF-USA-009). Sin toque de credencial, el registro queda como "operador no identificado" (RF-ACR-011).
+- **Login:** el flujo de credencial más PIN entra como supervisor. El operador no inicia sesión.
 - **Nombre del producto:** SITCO Aranda.
-- **Límite de arsénico:** 0,40 %, con lotes y mezclas de demostración coherentes (el lote en excepción sobre 0,40 %, los demás entre 0,28 y 0,39 %).
-- **Información contextual emergente** (numeral 25.4): ayudas con globo.
+- **Límite de arsénico:** 0,40 %, con lotes y mezclas de demostración coherentes.
+- **Información contextual emergente** (numeral 25.4).
+- **Trazabilidad:** supuestos SUP-11 y SUP-03 del Subdocumento 2 en pantalla, y cada etapa del ciclo marcada como medida o supuesta, con su regla y versión (RF-TRZ-005).
+- **Conectividad:** dos fibras más satélite de órbita baja, "Nodo de Faena" en vez de "borde de faena", nube en Santiago con réplica en São Paulo, y regla de conflicto al sincronizar (el plan lo gana la nube; los hechos de faena, el Nodo).
+- **Revocación y bloqueo:** textos alineados con el Subdocumento 4 (dispositivo en 15 minutos o menos, credencial en 24 horas o menos, sin propagación durante un corte). La autonomía local no se puede bajar de 48 h.
+- **Avisos de vencimiento:** 30, 15 y 7 días, a la persona, su empleador y Seguridad (RF-ACR-006).
+- **Supervisor en tableta:** firma en la inspección (RNF-USA-007), pestaña "Falla" con aviso a SAP (RF-EQU-005) y hora del hecho en los incidentes (RF-CUM-002).
+- **Autoría:** los registros y las versiones del plan quedan a nombre de la persona que los hace.
+- **Coherencia de cifras:** tres fabricantes de telemetría, indicadores de la compañía rotulados como "meta interna", conciliación sin cifras contradictorias y valores de ejemplo avisados como tales.
+- **Mapa del sitio** con el Centro de control, y color de los gráficos con contraste suficiente.

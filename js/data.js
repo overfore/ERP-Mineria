@@ -95,14 +95,14 @@ H.chain = (id) => {
 };
 H.reverse = (pid) => { const out = []; H.EMBARQUES.forEach(e => { const c = H.chain(e.id).find(x => x.poli.id === pid); if (c) out.push({ e, c }); }); return out; };
 H.CHAIN_STEPS = [
-  { t: 'Plan y polígono', s: 'Versión vigente del plan al momento de cada carga', sys: 'Software de planificación → plataforma', ico: 'cal' },
-  { t: 'Extracción y carguío', s: 'Cambios de material con su razón (1 toque del operador)', sys: 'Despacho de flota + terreno', ico: 'truck' },
-  { t: 'Descarga y stock intermedio', s: 'Pesaje a bordo, báscula de control y trazabilidad por stock', sys: 'Despacho + báscula', ico: 'layers' },
-  { t: 'Retoma y planta', s: 'Mezcla retomada y balanza de alimentación (solo lectura)', sys: 'Historiador OT (solo lectura)', ico: 'zap' },
-  { t: 'Muestreo y laboratorio', s: 'Resultados sin transcripción, en ambos sentidos', sys: 'Sistema de gestión de laboratorio', ico: 'db' },
-  { t: 'Concentrado y despacho a puerto', s: 'Guías de despacho y pesaje por camión', sys: 'Báscula + guía electrónica', ico: 'truck' },
-  { t: 'Conformación del lote comercial', s: 'Mezcla en acopio portuario y muestreo del protocolo comercial', sys: 'Terminal de terceros', ico: 'box' },
-  { t: 'Embarque y cierre', s: 'Documentos de embarque; liquidación y árbitro meses después', sys: 'SAP emite · plataforma entrega datos', ico: 'flag' }
+  { t: 'Plan y polígono', s: 'Versión vigente del plan al momento de cada carga', sys: 'Software de planificación → plataforma', ico: 'cal', dato: 'Medido' },
+  { t: 'Extracción y carguío', s: 'Cambios de destino declarados por el operador en la botonera (1 toque).', sys: 'Despacho de flota + terreno', ico: 'truck', dato: 'Supuesto', regla: 'el viaje se asigna al polígono donde está la pala (SUP-11), versión 1.' },
+  { t: 'Descarga y stock intermedio', s: 'Pesaje a bordo, báscula de control y trazabilidad por stock', sys: 'Despacho + báscula', ico: 'layers', dato: 'Supuesto', regla: 'promedio ponderado por tonelaje de lo acopiado (SUP-03), versión 1.' },
+  { t: 'Retoma y planta', s: 'Mezcla retomada y balanza de alimentación (solo lectura)', sys: 'Historiador OT (solo lectura)', ico: 'zap', dato: 'Supuesto', regla: 'ley del material retomado con el promedio ponderado del stock (SUP-03), versión 1.' },
+  { t: 'Muestreo y laboratorio', s: 'Resultados sin transcripción, en ambos sentidos', sys: 'Sistema de gestión de laboratorio', ico: 'db', dato: 'Medido' },
+  { t: 'Concentrado y despacho a puerto', s: 'Guías de despacho y pesaje por camión', sys: 'Báscula + SAP (emite la guía con código QR)', ico: 'truck', dato: 'Medido' },
+  { t: 'Conformación del lote comercial', s: 'Mezcla en acopio portuario y muestreo del protocolo comercial', sys: 'Terminal de terceros', ico: 'box', dato: 'Medido' },
+  { t: 'Embarque y cierre', s: 'Documentos de embarque; liquidación y árbitro meses después', sys: 'SAP emite · plataforma entrega datos', ico: 'flag', dato: 'Medido' }
 ];
 
 /* ---------- Plan minero ---------- */
@@ -117,11 +117,10 @@ H.PLAN_VERS = [
 H.CUMPL = { labels: ['T-6', 'T-5', 'T-4', 'T-3', 'T-2', 'T-1', 'Hoy'].concat([]), vigente: [91, 88, 93, 90, 94, 92, 95], domingo: [91, 80, 76, 74, 79, 72, 70] };
 
 /* ---------- Equipos ---------- */
-const FAB = ['Fabricante A', 'Fabricante A', 'Fabricante B'];
 H.EQUIPOS = [
-  ...Array.from({ length: 38 }, (_, i) => ({ id: `CF-${pad(i + 1)}`, tipo: 'Camión 240 t', fab: i < 22 ? 'Fabricante A' : 'Fabricante B', gen: i < 14 ? 'Gen 1' : i < 28 ? 'Gen 2' : 'Gen 3' })),
-  ...Array.from({ length: 5 }, (_, i) => ({ id: `PA-${pad(i + 1)}`, tipo: 'Pala eléctrica', fab: 'Fabricante C', gen: 'Cable' })),
-  ...Array.from({ length: 9 }, (_, i) => ({ id: `PF-${pad(i + 1)}`, tipo: 'Perforadora', fab: 'Fabricante D', gen: i < 2 ? 'Instrumentada' : 'Sin instrumentar' }))
+  ...Array.from({ length: 38 }, (_, i) => ({ id: `CF-${pad(i + 1)}`, tipo: 'Camión 240 t', fab: 'Fabricante A', gen: i < 14 ? 'Gen 1' : i < 28 ? 'Gen 2' : 'Gen 3' })),
+  ...Array.from({ length: 5 }, (_, i) => ({ id: `PA-${pad(i + 1)}`, tipo: 'Pala eléctrica', fab: 'Fabricante B', gen: 'Cable' })),
+  ...Array.from({ length: 9 }, (_, i) => ({ id: `PF-${pad(i + 1)}`, tipo: 'Perforadora', fab: 'Fabricante C', gen: i < 2 ? 'Instrumentada' : 'Sin instrumentar' }))
 ];
 const CAUSAS = ['Falla mecánica', 'Falla eléctrica', 'Espera de pala', 'Espera de camión', 'Clima / viento', 'Cambio de turno', 'Combustible', 'Sin clasificar'];
 H.CAUSAS = CAUSAS;
@@ -193,10 +192,11 @@ H.MATRIZ = {
 H.PARAMS = [
   { k: 'as', l: 'Límite contractual de arsénico en concentrado', v: 0.40, u: '%', min: 0.05, max: 1, step: 0.01, h: 'Supuesto ilustrativo, igual al del Anexo del Subdocumento 13 (el caso no entrega este valor). Se confirma con el contrato de cada comprador.' },
   { k: 'conc', l: 'Umbral de diferencia de conciliación', v: 2.0, u: '%', min: 0.5, max: 5, step: 0.1, h: 'Referencia de industria: bajo 2 %.' },
-  { k: 'v1', l: 'Aviso de vencimiento · primer recordatorio', v: 30, u: 'días', min: 7, max: 60, step: 1, h: 'Se notifica a la persona, su empleador y Seguridad.' },
-  { k: 'v2', l: 'Aviso de vencimiento · segundo recordatorio', v: 7, u: 'días', min: 1, max: 15, step: 1, h: 'Escalamiento al encargado de la empresa contratista.' },
+  { k: 'v1', l: 'Aviso de vencimiento · primer recordatorio', v: 30, u: 'días', min: 7, max: 60, step: 1, h: 'Se notifica a la vez a la persona, su empleador y Seguridad.' },
+  { k: 'v15', l: 'Aviso de vencimiento · segundo recordatorio', v: 15, u: 'días', min: 7, max: 30, step: 1, h: 'Se notifica a la vez a la persona, su empleador y Seguridad.' },
+  { k: 'v2', l: 'Aviso de vencimiento · tercer recordatorio', v: 7, u: 'días', min: 1, max: 15, step: 1, h: 'Se notifica a la vez a la persona, su empleador y Seguridad.' },
   { k: 'alerta', l: 'Máximo de alertas de mantenimiento por semana', v: 15, u: 'alertas', min: 5, max: 60, step: 1, h: 'Controla el ruido: sobre el máximo se agrupan y priorizan.' },
-  { k: 'aut', l: 'Autonomía local garantizada sin enlace', v: 48, u: 'horas', min: 24, max: 96, step: 4, h: 'Criterio de aceptación 13: continuar y registrar 48 h.' },
+  { k: 'aut', l: 'Autonomía local garantizada sin enlace', v: 48, u: 'horas', min: 48, max: 96, step: 4, h: 'Compromiso mínimo de 48 h (criterio de aceptación 13), con sincronización en 4 horas o menos. Se puede ampliar, no reducir.' },
   { k: 'ses', l: 'Cierre de sesión por inactividad', v: 15, u: 'minutos', min: 5, max: 60, step: 5, h: 'No aplica a dispositivos de cabina durante el turno.' }
 ];
 const ACC = ['Inició sesión', 'Aprobó acreditación', 'Rechazó acreditación', 'Modificó rol', 'Exportó informe', 'Cambió parámetro', 'Aprobó lote de embarque', 'Registró incidente', 'Clasificó detención', 'Generó reporte ambiental', 'Elevó privilegio (temporal)'];

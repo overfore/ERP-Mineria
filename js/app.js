@@ -119,7 +119,7 @@ function paintConn() {
   const tmp = document.createElement('div'); tmp.innerHTML = connChip(); const n = tmp.firstChild;
   c.className = n.className; c.innerHTML = n.innerHTML; c.setAttribute('aria-label', n.getAttribute('aria-label'));
   const S = H.Sim, off = $('#offbar');
-  if (off) off.innerHTML = S.link === 'down' && H.S.user ? `<div class="offline-bar" role="status">${ico('wifiOff')}<strong>Sin enlace con Antofagasta.</strong><span>La operación continúa en modo local desde el borde de faena · ${nd(S.hours, 0)} h de 48 h de autonomía · ${nf(S.pending())} registros por sincronizar.</span><a href="#/conectividad" class="link-btn">Ver detalle</a></div>` : '';
+  if (off) off.innerHTML = S.link === 'down' && H.S.user ? `<div class="offline-bar" role="status">${ico('wifiOff')}<strong>Sin camino a la nube.</strong><span>La operación continúa en modo local desde el Nodo de Faena · ${nd(S.hours, 0)} h de 48 h de autonomía · ${nf(S.pending())} registros por sincronizar.</span><a href="#/conectividad" class="link-btn">Ver detalle</a></div>` : '';
   const p = $('#sim-panel'); if (p && !p.classList.contains('hide') && !p.contains(document.activeElement)) p.innerHTML = H.simPanel();
 }
 H.Sim.on(paintConn);

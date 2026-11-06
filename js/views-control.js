@@ -98,7 +98,7 @@ function selCard() {
 }
 function linkNote() {
   const S = H.Sim;
-  if (S.link === 'down') return `<div class="cc-note warn" id="cc-note"><b>Sin enlace con Antofagasta.</b> El despacho sigue funcionando desde el borde de faena (modo local · ${S.hours} h de 48 h). Lo que ocurra se sincroniza solo al volver la fibra.</div>`;
+  if (S.link === 'down') return `<div class="cc-note warn" id="cc-note"><b>Sin camino a la nube.</b> El despacho sigue funcionando desde el Nodo de Faena (modo local · ${S.hours} h de 48 h). Lo que ocurra se sincroniza solo al volver un camino a la nube.</div>`;
   if (S.lte === 'shadow') return `<div class="cc-note warn" id="cc-note"><b>Zona sin cobertura LTE en el fondo del rajo.</b> Los equipos de esa zona se ven atenuados y guardan cada evento en el propio equipo hasta recuperar señal.</div>`;
   return `<div class="cc-note" id="cc-note">Conectado a la nube · datos en tiempo real. Prueba “Simular nube” (abajo a la derecha) para cortar la fibra o crear una sombra de cobertura.</div>`;
 }
@@ -169,15 +169,15 @@ function isoArch() {
   const O1 = [190, 255], O2 = [445, 205], O3 = [700, 95];
   const faena = plat(O1, C_Y, 'FAENA · EQUIPOS') + box(O1, 30, 30, 10, 60, 34, 22, C_D) + box(O1, 40, 35, 32, 30, 22, 16, C_Y) + box(O1, 110, 50, 10, 44, 24, 16, C_W) + box(O1, 118, 56, 26, 22, 14, 12, C_Y)
     + box(O1, 120, 130, 10, 28, 20, 30, C_D) + box(O1, 30, 120, 10, 6, 6, 60, C_W) + box(O1, 150, 20, 10, 5, 5, 54, C_W) + box(O1, 70, 130, 10, 16, 4, 20, ['#6fe0b5', '#3fbf8f', '#2f9e6a']);
-  const borde = plat(O2, C_B, 'BORDE DE FAENA') + box(O2, 30, 30, 10, 20, 20, 44, C_D) + box(O2, 60, 30, 10, 20, 20, 54, C_D) + box(O2, 90, 30, 10, 20, 20, 36, C_D) + box(O2, 40, 100, 10, 60, 8, 40, C_W) + box(O2, 130, 110, 10, 34, 26, 12, C_D) + `<text x="${iso(60, 40, 76, O2)[0]}" y="${iso(60, 40, 76, O2)[1] - 6}" fill="#fff" font-size="11" text-anchor="middle">servidor local 48 h</text>`;
+  const borde = plat(O2, C_B, 'NODO DE FAENA') + box(O2, 30, 30, 10, 20, 20, 44, C_D) + box(O2, 60, 30, 10, 20, 20, 54, C_D) + box(O2, 90, 30, 10, 20, 20, 36, C_D) + box(O2, 40, 100, 10, 60, 8, 40, C_W) + box(O2, 130, 110, 10, 34, 26, 12, C_D) + `<text x="${iso(60, 40, 76, O2)[0]}" y="${iso(60, 40, 76, O2)[1] - 6}" fill="#fff" font-size="11" text-anchor="middle">servidor local 48 h</text>`;
   const nube = plat(O3, C_G, 'NUBE · ANTOFAGASTA') + box(O3, 30, 40, 10, 50, 10, 56, C_W) + box(O3, 100, 40, 10, 40, 10, 40, C_W) + box(O3, 40, 120, 10, 22, 22, 30, C_D) + box(O3, 70, 120, 10, 22, 22, 46, C_D) + box(O3, 100, 120, 10, 22, 22, 22, C_D) + `<ellipse cx="${iso(95, 90, 90, O3)[0]}" cy="${iso(95, 90, 90, O3)[1] - 60}" rx="44" ry="22" fill="#e8edf0" fill-opacity=".92"/><ellipse cx="${iso(95, 90, 90, O3)[0] - 26}" cy="${iso(95, 90, 90, O3)[1] - 52}" rx="24" ry="16" fill="#e8edf0" fill-opacity=".92"/>`;
   const a1 = iso(190, 95, 10, O1), a2 = iso(0, 95, 10, O2), b1 = iso(190, 95, 10, O2), b2 = iso(0, 95, 10, O3);
   const pipes = `<path d="M${a1[0]} ${a1[1]} L${a2[0]} ${a2[1]}" stroke="${S.lte === 'shadow' ? '#f2b84b' : pipe2}" stroke-width="5" fill="none" class="iso-dash"/><text x="${(a1[0] + a2[0]) / 2}" y="${(a1[1] + a2[1]) / 2 + 30}" fill="#fff" font-size="11" text-anchor="middle">LTE / 5G privada</text>
     <path d="M${b1[0]} ${b1[1]} L${b2[0]} ${b2[1]}" stroke="${pipe}" stroke-width="5" fill="none" ${down ? 'stroke-dasharray="4 10"' : 'class="iso-dash"'}/><text x="${(b1[0] + b2[0]) / 2}" y="${(b1[1] + b2[1]) / 2 + 34}" fill="#fff" font-size="11" text-anchor="middle">fibra / enlace satelital</text>${down ? `<g transform="translate(${(b1[0] + b2[0]) / 2} ${(b1[1] + b2[1]) / 2})"><circle r="14" fill="#ff6b5e"/><path d="M-6-6l12 12M6-6l-12 12" stroke="#fff" stroke-width="3"/></g>` : ''}`;
   const q = S.pending();
-  return `<div class="cc" style="border-radius:10px"><div class="cc-bar"><span class="cc-t">Arquitectura de tres niveles</span><span class="cc-chip ${down ? 'bad' : q > 2 ? 'warn' : ''}"><i></i>${down ? 'Enlace caído · el borde sostiene la operación' : q > 2 ? `Sincronizando ${q} eventos` : 'Todo sincronizado'}</span></div>
-  <svg viewBox="0 0 900 500" style="display:block;width:100%;height:auto;background:#23272b" role="img" aria-label="Tres plataformas: faena y equipos, borde de faena con servidor local, y nube en Antofagasta"><g>${nube}${borde}${faena}${pipes}</g></svg>
-  <div class="cc-note"><b>Cómo se lee:</b> el equipo guarda cada evento y lo manda al borde; el borde responde a la faena aunque no haya enlace con Antofagasta (hasta 48 h) y sube todo en orden cuando vuelve la fibra.</div></div>`;
+  return `<div class="cc" style="border-radius:10px"><div class="cc-bar"><span class="cc-t">Arquitectura de tres niveles</span><span class="cc-chip ${down ? 'bad' : q > 2 ? 'warn' : ''}"><i></i>${down ? 'Sin camino a la nube · el Nodo de Faena sostiene la operación' : q > 2 ? `Sincronizando ${q} eventos` : 'Todo sincronizado'}</span></div>
+  <svg viewBox="0 0 900 500" style="display:block;width:100%;height:auto;background:#23272b" role="img" aria-label="Tres plataformas: faena y equipos, Nodo de Faena con servidor local, y nube en Santiago"><g>${nube}${borde}${faena}${pipes}</g></svg>
+  <div class="cc-note"><b>Cómo se lee:</b> el equipo guarda cada evento y lo manda al Nodo de Faena; el Nodo responde a la faena aunque no haya enlace con la nube (hasta 48 h) y sube todo en orden cuando vuelve un camino.</div></div>`;
 }
 H.isoArch = isoArch;
 
@@ -192,7 +192,7 @@ function body() {
 }
 function shell() {
   const S = H.Sim, tabs = [['desp', 'Despacho y mapa'], ['geo', 'Geotecnia'], ['pit', 'Pit 3D'], ['arq', 'Arquitectura']];
-  return `<div class="cc" id="cc-root"><div class="cc-bar"><span class="cc-t">Centro Integrado de Operaciones</span><span class="cc-chip ${S.link === 'down' ? 'warn' : ''}" id="cc-lk"><i></i>${S.link === 'down' ? 'Modo local (borde de faena)' : 'Nube conectada'}</span><div class="cc-tabs" role="tablist" aria-label="Vistas del centro de control">${tabs.map(([k, l]) => `<button role="tab" aria-selected="${CC.tab === k}" data-act="ccTab" data-k="${k}">${l}</button>`).join('')}</div></div>${CC.tab === 'desp' ? kpisHtml() : ''}<div id="cc-body">${body()}</div>${CC.tab === 'desp' ? linkNote() : ''}</div>`;
+  return `<div class="cc" id="cc-root"><div class="cc-bar"><span class="cc-t">Centro Integrado de Operaciones</span><span class="cc-chip ${S.link === 'down' ? 'warn' : ''}" id="cc-lk"><i></i>${S.link === 'down' ? 'Modo local (Nodo de Faena)' : 'Nube conectada'}</span><div class="cc-tabs" role="tablist" aria-label="Vistas del centro de control">${tabs.map(([k, l]) => `<button role="tab" aria-selected="${CC.tab === k}" data-act="ccTab" data-k="${k}">${l}</button>`).join('')}</div></div>${CC.tab === 'desp' ? kpisHtml() : ''}<div id="cc-body">${body()}</div>${CC.tab === 'desp' ? linkNote() : ''}</div>`;
 }
 const redraw = () => { const r = $('#cc-root'); if (r) r.outerHTML = shell(); };
 
@@ -210,7 +210,7 @@ H.route('/control', {
       } else if (CC.tab === 'pit' && CC.spin) { CC.a = (CC.a + .03) % 6.283; const s = $('#pit-svg'); if (s) { s.outerHTML = pit3d().replace('<svg', '<svg id="pit-svg"'); } }
       else if (CC.tab === 'geo') { const v = $('#geo-v'); if (v) v.textContent = (4.2 + Math.sin(Date.now() / 4000) * .6).toFixed(1).replace('.', ','); }
     }, 450);
-    H.Sim.on(() => { if (!$('#cc-root')) return; const n = $('#cc-note'); if (n) n.outerHTML = linkNote(); const l = $('#cc-lk'); if (l) { l.className = 'cc-chip' + (H.Sim.link === 'down' ? ' warn' : ''); l.innerHTML = `<i></i>${H.Sim.link === 'down' ? 'Modo local (borde de faena)' : 'Nube conectada'}`; } if (CC.tab === 'arq') { const b = $('#cc-body'); if (b) b.innerHTML = isoArch(); } });
+    H.Sim.on(() => { if (!$('#cc-root')) return; const n = $('#cc-note'); if (n) n.outerHTML = linkNote(); const l = $('#cc-lk'); if (l) { l.className = 'cc-chip' + (H.Sim.link === 'down' ? ' warn' : ''); l.innerHTML = `<i></i>${H.Sim.link === 'down' ? 'Modo local (Nodo de Faena)' : 'Nube conectada'}`; } if (CC.tab === 'arq') { const b = $('#cc-body'); if (b) b.innerHTML = isoArch(); } });
   }
 });
 
