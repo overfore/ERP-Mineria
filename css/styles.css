@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Sistema de diseño — Huella Aranda (RT-25.05)
+   Sistema de diseño — SITCO Aranda (RT-25.05)
    Paleta principal (5): pizarra, cobre, arena, acero, verde señal.
    Tipografías (2): Barlow Semi Condensed (títulos) · IBM Plex Sans (texto).
    Retícula de 8 px. Estados funcionales (advertencia/error) derivados.
@@ -372,3 +372,29 @@ canvas.sign{width:100%;height:140px;border:2px dashed var(--steel);border-radius
 .brand-lock strong{display:block;font:700 19px var(--f-head);color:#fff;letter-spacing:.02em}.brand-lock span:not(.brand-mark){display:block;font-size:13px;color:#DCE2E6}
 .side-foot{margin-top:var(--s5);font-size:13px;color:#C3CDD4;border-top:1px solid rgba(255,255,255,.2);padding-top:var(--s3)}
 @media(max-width:1023px){.side-in{padding:var(--s5)}}
+
+/* Botonera de Pala (Figura 3.10 del Subdocumento 3): ilustración del dispositivo físico, sin pantalla.
+   Sus colores de destino son los del dispositivo, no parte de la paleta de la interfaz. */
+.botonera-wrap{width:min(100%,380px);margin:0 auto}
+.botonera{background:#3A4150;border:6px solid #262A30;border-radius:22px;padding:14px;display:grid;gap:12px;box-shadow:var(--shadow)}
+.botonera .dev-bar{background:transparent;padding:0 4px;justify-content:flex-start;gap:18px}
+.bled{display:inline-block;width:14px;height:14px;border-radius:50%;background:#262A30;border:2px solid rgba(255,255,255,.45)}
+.bled.on-g{background:#46C05A;border-color:#fff}
+.bled.on-b{background:#4AA3FF;border-color:#fff}
+.bled.on-a{background:#FFC24A;border-color:#fff}
+.bot-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.bot-btn{position:relative;min-height:128px;border-radius:14px;border:4px solid rgba(0,0,0,.4);color:#fff;font:700 24px var(--f-head);text-transform:uppercase;letter-spacing:.02em;cursor:pointer;width:100%}
+.bot-btn:active{transform:scale(.98)}
+.bot-btn.plant{background:#2E7D32}
+.bot-btn.baja{background:#E0B030;color:#1E2B35}
+.bot-btn.est{background:#7A634E}
+.bot-btn.borde{background:#2F5FA8}
+.bot-btn .bled.plan{position:absolute;top:8px;left:50%;transform:translateX(-50%);background:#fff;border-color:rgba(0,0,0,.4)}
+.bot-cred{background:#262A30;color:#fff;border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:10px;min-height:64px;font:600 16px var(--f-body)}
+.bot-cred svg.i{width:24px;height:24px;flex:none}
+.bot-credbtn{display:flex;align-items:center;gap:10px;width:100%;min-height:56px;background:transparent;border:2px dashed rgba(255,255,255,.6);border-radius:10px;color:#fff;font:600 16px var(--f-body);cursor:pointer;padding:0 12px}
+.bot-credbtn small{font-weight:400;opacity:.85}
+
+.tip.off .pop{display:none!important}
+.tip.inl{margin:-10px 0 -10px 4px;vertical-align:middle}
+.tip svg.i{width:20px;height:20px}

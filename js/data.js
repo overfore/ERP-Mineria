@@ -3,7 +3,7 @@
    data.js — datos ficticios de demostración, consistentes con el Caso 01
    (Compañía Minera Altos de Aranda S.A., empresa ficticia).
    ===================================================================== */
-H.BRAND = { product: 'Huella Aranda', vendor: 'OVERFORE', client: 'Compañía Minera Altos de Aranda S.A.' };
+H.BRAND = { product: 'SITCO Aranda', vendor: 'OVERFORE', client: 'Compañía Minera Altos de Aranda S.A.' };
 
 /* ---------- Perfiles de persona usuaria ---------- */
 H.ROLES = {
@@ -73,18 +73,18 @@ H.POLIS = Array.from({ length: 18 }, (_, i) => { const b = BANCOS[i % 6]; const 
 H.POLIS.forEach(p => p.real = Math.round(p.plan * (0.82 + R() * 0.24)));
 H.AC.polis = H.POLIS.map(p => p.id);
 H.STOCKS = [{ id: 'STK-A', n: 'Stock A · alta ley', t: 182000, ley: 0.61 }, { id: 'STK-B', n: 'Stock B · mezcla', t: 240000, ley: 0.53 }, { id: 'STK-C', n: 'Stock C · oxidado', t: 96000, ley: 0.49 }, { id: 'STK-BL', n: 'Stock baja ley', t: 410000, ley: 0.38 }];
-H.AS_LIM = 0.25; // supuesto declarado: límite contractual de arsénico en concentrado (%)
+H.AS_LIM = 0.40; // supuesto ilustrativo: límite del contrato de arsénico en concentrado (%), igual al de S13 Anexos (el caso no entrega el valor)
 const NAVES = ['MN Hokuetsu Star', 'MV Han River', 'MN Pacific Ayame', 'MV Coral Andes', 'MN Seto Maru', 'MV Pampa Sur', 'MN Kaiyo Pearl', 'MV Dalian Spirit'];
 const ESTADOS_E = ['Programado', 'En conformación', 'En muestreo', 'Pendiente de aprobación', 'Embarcado', 'Liquidado'];
 H.EMBARQUES = Array.from({ length: 14 }, (_, i) => {
   const e = i < 2 ? 5 : i < 5 ? 4 : i === 5 ? 3 : i < 8 ? 2 : i < 10 ? 1 : 0;
-  const as = i === 7 ? 0.28 : +(0.14 + R() * 0.1).toFixed(2);
+  const as = i === 7 ? 0.39 : +(0.28 + R() * 0.1).toFixed(2);
   return { id: `E-2026-${String(30 - i).padStart(2, '0')}`, nave: NAVES[i % NAVES.length], comprador: i % 3 === 2 ? 'Han River Metals (Corea)' : 'Pacific Smelting Co. (Japón)', t: 11400 + Math.round(R() * 1400), cu: +(26.6 + R() * 1.1).toFixed(1), as, estado: ESTADOS_E[5 - (e === 5 ? 5 : e === 4 ? 4 : e)] || 'Programado', e: e, fecha: dOff(-12 * i + 6), exc: i === 7 };
 });
 // asignación explícita de estados coherentes
 const ST = ['Programado', 'Programado', 'En conformación', 'En muestreo', 'Pendiente de aprobación', 'Embarcado', 'Embarcado', 'Liquidado', 'Liquidado', 'Liquidado', 'Liquidado', 'Liquidado', 'Liquidado', 'Liquidado'];
 H.EMBARQUES.forEach((e, i) => { e.estado = ST[i]; e.paso = [1, 1, 2, 3, 4, 7, 7, 8, 8, 8, 8, 8, 8, 8][i]; e.fecha = dOff([14, 7, 2, -1, -3, -9, -15, -21, -32, -44, -55, -68, -80, -92][i]); });
-H.EMBARQUES[4].exc = true; H.EMBARQUES[4].as = 0.28; H.EMBARQUES[7].exc = false;
+H.EMBARQUES[4].exc = true; H.EMBARQUES[4].as = 0.43; H.EMBARQUES[7].exc = false;
 H.EMB = id => H.EMBARQUES.find(e => e.id === id);
 // contribución de polígonos por embarque (determinista)
 H.chain = (id) => {
@@ -191,7 +191,7 @@ H.MATRIZ = {
   seguridad: [0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1], sustentabilidad: [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], contratista: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], gerencia: [1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1], admin: [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1]
 };
 H.PARAMS = [
-  { k: 'as', l: 'Límite contractual de arsénico en concentrado', v: 0.25, u: '%', min: 0.05, max: 1, step: 0.01, h: 'Supuesto S-07: se confirma con el contrato de cada comprador.' },
+  { k: 'as', l: 'Límite contractual de arsénico en concentrado', v: 0.40, u: '%', min: 0.05, max: 1, step: 0.01, h: 'Supuesto ilustrativo, igual al del Anexo del Subdocumento 13 (el caso no entrega este valor). Se confirma con el contrato de cada comprador.' },
   { k: 'conc', l: 'Umbral de diferencia de conciliación', v: 2.0, u: '%', min: 0.5, max: 5, step: 0.1, h: 'Referencia de industria: bajo 2 %.' },
   { k: 'v1', l: 'Aviso de vencimiento · primer recordatorio', v: 30, u: 'días', min: 7, max: 60, step: 1, h: 'Se notifica a la persona, su empleador y Seguridad.' },
   { k: 'v2', l: 'Aviso de vencimiento · segundo recordatorio', v: 7, u: 'días', min: 1, max: 15, step: 1, h: 'Escalamiento al encargado de la empresa contratista.' },

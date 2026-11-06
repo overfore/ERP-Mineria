@@ -154,7 +154,7 @@ function pit3d() {
 function pitLeg() {
   if (CC.by === 'mat') return ['Óxido', 'Sulfuro alto', 'Sulfuro bajo', 'Mixto', 'Lastre', 'Estéril', 'Lixiviable', 'Roca dura'].map((n, i) => `<span><i style="background:${PITPAL.mat[i]}"></i>${n}</span>`).join('');
   if (CC.by === 'cu') return '<span><i style="background:hsl(210 70% 30%)"></i>Ley baja</span><span><i style="background:hsl(120 70% 44%)"></i>Media</span><span><i style="background:hsl(20 70% 58%)"></i>Ley alta de Cu</span>';
-  return '<span><i style="background:#e0382a"></i>Sobre el límite de arsénico (0,25 %)</span><span><i style="background:#454540"></i>Bajo el límite</span><span>El límite es un parámetro, no una constante.</span>';
+  return '<span><i style="background:#e0382a"></i>Sobre el límite de arsénico (' + nd(H.AS_LIM, 2) + ' %)</span><span><i style="background:#454540"></i>Bajo el límite</span><span>El límite es un parámetro, no una constante.</span>';
 }
 
 /* ---------- Arquitectura isométrica (equipo → borde → nube) ---------- */

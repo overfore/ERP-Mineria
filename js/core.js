@@ -422,6 +422,13 @@ H.C = {
 /* ---------- Tarjetas y utilidades de maquetación ---------- */
 H.card = (title, body, o = {}) => `<section class="card ${o.cls || ''}" ${o.id ? `id="${o.id}"` : ''}><div class="card-h"><h3>${title}</h3>${o.right || ''}</div>${o.sub ? `<p class="muted small">${o.sub}</p>` : ''}${body}</section>`;
 H.kpi = (lbl, val, unit, dlt, cls, href, extra = '') => `<${href ? `a href="${href}"` : 'div'} class="kpi" style="text-decoration:none" ${href ? `aria-label="${esc(lbl)}: ${esc(val)} ${esc(unit || '')}. Ver detalle"` : ''}><span class="lbl">${lbl}</span><span class="val">${val}${unit ? ` <small>${unit}</small>` : ''}</span>${dlt ? `<span class="dlt ${cls || 'neu'}">${dlt}</span>` : ''}${extra}</${href ? 'a' : 'div'}>`;
+
+/* Información contextual emergente (25.4): botón de 44 px con globo que aparece al pasar el mouse o con el teclado; Esc lo cierra. */
+let tipN = 0;
+H.tip = (txt, inl = false) => { const id = 'tip-' + (++tipN); return `<button type="button" class="tip${inl ? ' inl' : ''}" aria-label="Más información" aria-describedby="${id}">${ico('help')}<span class="pop" role="tooltip" id="${id}">${esc(txt)}</span></button>`; };
+document.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('.tip').forEach(t => { if (t.matches(':hover,:focus-within')) t.classList.add('off'); }); });
+['focusout', 'mouseout'].forEach(ev => document.addEventListener(ev, e => { const t = e.target.closest && e.target.closest('.tip'); if (t && !t.contains(e.relatedTarget)) t.classList.remove('off'); }));
+{ const kpi0 = H.kpi; H.kpi = (lbl, val, unit, dlt, cls, href, extra = '') => kpi0(lbl, val, unit, dlt, cls, href, (!href && /Línea base/i.test(dlt || '') ? H.tip('Línea base: el valor de 2025, antes de SITCO, tomado de las Bases técnicas del caso. La flecha muestra la mejora que estima el prototipo.', true) : '') + extra); }
 H.badge = (t, k = '') => `<span class="badge ${k}">${t}</span>`;
 H.banner = (k, html, act = '') => `<div class="banner ${k}" role="${k === 'err' || k === 'warn' ? 'alert' : 'note'}">${ico(k === 'ok' ? 'check' : k === 'info' ? 'info' : 'alert')}<div class="grow">${html}</div>${act}</div>`;
 H.accordion = (title, body, open) => `<details class="acc" ${open ? 'open' : ''}><summary>${title}</summary><div>${body}</div></details>`;

@@ -39,7 +39,7 @@ H.route('/', {
     <div class="grid g-auto mt2" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr))">${Object.entries(H.ROLES).map(([k, r]) => `<button class="role-card" data-act="quickRole" data-r="${k}"><span class="ico">${ico(r.ico)}</span><strong>${r.label}</strong><span class="small muted">${r.desc}</span></button>`).join('')}</div></div></section>
   <section class="sect" style="background:var(--white);border-block:1px solid var(--sand-2)" aria-labelledby="h-how"><div class="wrap"><h2 id="h-how">Cómo se resuelve lo que duele</h2>
     <div class="grid g3 mt2">
-      <div class="card flat"><span class="ico badge cu" style="margin-bottom:8px">${ico('pin')} 1 · Registrar donde ocurre</span><h3>El dato nace en el lugar del hecho</h3><p>Un toque del operador de pala registra el cambio de material con su contexto (pala, polígono, hora). Los incidentes se firman en terreno. Nada de digitar días después.</p></div>
+      <div class="card flat"><span class="ico badge cu" style="margin-bottom:8px">${ico('pin')} 1 · Registrar donde ocurre</span><h3>El dato nace en el lugar del hecho</h3><p>Un toque del operador de pala, en la botonera, registra el cambio de destino con su contexto (pala, polígono, hora). Los incidentes se firman en terreno. Nada de digitar días después.</p></div>
       <div class="card flat"><span class="ico badge cu" style="margin-bottom:8px">${ico('route')} 2 · Seguir la huella</span><h3>De cualquier lote al polígono, y de vuelta</h3><p>Del embarque al banco de origen, por los stocks y la planta, con la versión del plan vigente y los análisis que respaldan cada paso.</p></div>
       <div class="card flat"><span class="ico badge cu" style="margin-bottom:8px">${ico('shield')} 3 · Cumplir sin planillas</span><h3>Reportes que salen del sistema</h3><p>Acreditaciones que avisan antes del vencimiento, reportes a la autoridad con trazabilidad hasta la medición y huella de carbono verificable.</p></div></div></div></section>
   <section class="sect" aria-labelledby="h-off"><div class="wrap grid g2" style="align-items:center;gap:var(--s6)"><div><h2 id="h-off">Pensada para el rajo, no para la oficina</h2><ul style="padding-left:20px"><li>Botones grandes para operar con guantes.</li><li>Modo sol de alto contraste para el mediodía.</li><li>Sin señal en el fondo del rajo: el equipo guarda y envía al volver.</li><li>Corte de fibra de hasta 48 h: el borde de faena sigue operando.</li></ul><a class="btn sec" href="#/conectividad-demo">Ver cómo se sincroniza</a></div>
@@ -56,14 +56,14 @@ H.route('/ayuda-publica', { title: 'Accesibilidad', public: true, fast: true, re
 let pin = '', tries = 0;
 H.route('/login', {
   title: 'Iniciar sesión', public: true, fast: true,
-  render: () => `<div class="split"><div class="side has-art">${H.heroPit()}<div class="side-in">${H.brandMark()}<span class="badge" style="width:max-content;background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.3)">Acceso unificado</span><h1 id="pgh" tabindex="-1">Un solo ingreso, el mecanismo que le sirve a cada persona</h1><p style="color:#DCE2E6;font-size:18px">Oficina y Centro Integrado de Operaciones entran con su cuenta corporativa y segundo factor. En terreno, con <strong>credencial de faena y PIN</strong>: sin correo personal, sin teclear contraseñas con guantes.</p><ul style="color:#DCE2E6;padding-left:20px"><li>Identidad federada con el directorio del grupo</li><li>Doble factor obligatorio · sin credenciales compartidas</li><li>Registro completo de accesos</li></ul><p class="side-foot">Plataforma de trazabilidad, cumplimiento y operación · Huella Aranda por OVERFORE</p></div></div>
+  render: () => `<div class="split"><div class="side has-art">${H.heroPit()}<div class="side-in">${H.brandMark()}<span class="badge" style="width:max-content;background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.3)">Acceso unificado</span><h1 id="pgh" tabindex="-1">Un solo ingreso, el mecanismo que le sirve a cada persona</h1><p style="color:#DCE2E6;font-size:18px">Oficina y Centro Integrado de Operaciones entran con su cuenta corporativa y segundo factor. En terreno, con <strong>credencial de faena y PIN</strong>: sin correo personal, sin teclear contraseñas con guantes.</p><ul style="color:#DCE2E6;padding-left:20px"><li>Identidad federada con el directorio del grupo</li><li>Doble factor obligatorio · sin credenciales compartidas</li><li>Registro completo de accesos</li></ul><p class="side-foot">Plataforma de trazabilidad, cumplimiento y operación · SITCO Aranda por OVERFORE</p></div></div>
   <div class="form"><div class="card"><h2>Iniciar sesión</h2>
   ${H.tabs([{ id: 'corp', label: 'Cuenta corporativa' }, { id: 'cred', label: 'Credencial de faena' }], 'corp', {
     corp: `<form id="f-corp" novalidate>${H.field({ id: 'em', name: 'em', label: 'Correo corporativo', type: 'email', v: 'required|email', ph: 'nombre@aranda.example', hint: 'Te redirigiremos al directorio corporativo del grupo.', autocomplete: 'username' })}
       ${H.field({ id: 'rl', name: 'rl', label: 'Perfil de demostración', type: 'select', options: Object.entries(H.ROLES).filter(([k]) => k !== 'operador').map(([k, r]) => ({ v: k, l: r.label })), value: 'supervisor', hint: 'Solo en el prototipo: en producción el perfil lo define el directorio.' })}
       <button class="btn lg" style="width:100%" type="submit">Continuar con el directorio corporativo ${ico('chR')}</button>
       <div class="row between mt1"><a href="#/recuperar">¿Olvidaste tu acceso?</a><a href="#/registro">Soy empresa contratista</a></div></form>`,
-    cred: `<form id="f-cred" novalidate><p class="small muted">Para personal de terreno. Dispositivos compartidos por turno.</p>${H.field({ id: 'rutc', name: 'rutc', label: 'RUT de la credencial', v: 'required|rut', ph: '12.345.678-5', value: '12.345.678-5', inputmode: 'text' })}
+    cred: `<form id="f-cred" novalidate><p class="small muted">Para supervisión y portería: credencial más PIN. El operador de pala no inicia sesión: usa la botonera.</p>${H.field({ id: 'rutc', name: 'rutc', label: 'RUT de la credencial', v: 'required|rut', ph: '12.345.678-5', value: '12.345.678-5', inputmode: 'text' })}
       <div class="lbl-t" id="pin-l">PIN de 4 dígitos <span class="muted xs">(demostración: 1234)</span></div><div class="pin-dots" id="pin-dots" aria-live="polite" aria-label="Dígitos ingresados: 0 de 4"><i></i><i></i><i></i><i></i></div><div class="err-m" id="pin-e" role="alert" style="color:var(--err);text-align:center;font-weight:600;min-height:22px"></div>
       <div class="pin-pad" role="group" aria-labelledby="pin-l">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<button type="button" data-act="pinKey" data-k="${n}" aria-label="${n}">${n}</button>`).join('')}<button type="button" data-act="pinKey" data-k="del" aria-label="Borrar" style="font-size:18px">⌫</button><button type="button" data-act="pinKey" data-k="0" aria-label="0">0</button><button type="button" data-act="pinKey" data-k="ok" aria-label="Ingresar" style="background:var(--copper);color:#fff;border-color:var(--copper-d)">✓</button></div></form>`
   })}</div></div></div>`,
@@ -82,7 +82,7 @@ function checkPin() {
   const rutOkV = H.rutOk($('#rutc').value); if (!rutOkV) { $('#pin-e').textContent = 'Revisa el RUT de la credencial.'; return; }
   if (pin.length < 4) { $('#pin-e').textContent = 'Ingresa los 4 dígitos.'; return; }
   if (pin !== '1234') { tries++; pin = ''; $$('#pin-dots i').forEach(d => d.classList.remove('on')); $('#pin-e').textContent = tries >= 3 ? 'Credencial bloqueada. Avisa a tu supervisor.' : `PIN incorrecto. Te quedan ${3 - tries} intento${3 - tries > 1 ? 's' : ''}.`; return; }
-  H.S.pend = { role: 'operador', kind: 'cred' }; location.hash = '#/2fa';
+  H.S.pend = { role: 'supervisor', kind: 'cred' }; location.hash = '#/2fa';
 }
 
 /* ===== Segundo factor ===== */
@@ -104,7 +104,7 @@ H.route('/2fa', {
     let s = 30; clearInterval(otpTimer); otpTimer = setInterval(() => { s--; const t = $('#otp-t strong'); if (!t) return clearInterval(otpTimer); t.textContent = s; if (s <= 0) { clearInterval(otpTimer); $('#otp-t').innerHTML = '<span style="color:var(--warn)">El código venció. Solicita otro.</span>'; } }, 1000);
   }
 });
-H.A.nfc = () => { H.toast('Credencial leída correctamente.', 'ok', 2500); H.login('operador'); };
+H.A.nfc = () => { H.toast('Credencial leída correctamente.', 'ok', 2500); H.login('supervisor'); };
 H.A.otpResend = () => { H.toast('Se envió un nuevo código a tu aplicación autenticadora.', 'info'); H.routes['/2fa'].mount($('#main')); };
 
 /* ===== Recuperación de acceso ===== */

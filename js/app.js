@@ -39,7 +39,7 @@ function hdr(auth) {
       <div class="menu hide" role="menu" style="width:min(360px,92vw)">${H.NOTIFS.map(n => `<a role="menuitem" href="${n.h}" style="height:auto;padding:10px 12px;align-items:flex-start;flex-direction:column;gap:2px"><strong class="small">${n.t}</strong><span class="xs muted">${n.d}</span></a>`).join('')}</div></div>
     <a class="ibtn" href="#/ayuda" aria-label="Ayuda y accesibilidad">${ico('help')}</a>
     <div class="pos-rel"><button class="user-btn" data-act="menu" aria-haspopup="menu" aria-expanded="false"><span class="avatar" aria-hidden="true">${u.ini}</span><span class="nm">${esc(H.ROLES[u.role].label)}</span>${ico('chD')}</button>
-      <div class="menu hide" role="menu" style="width:min(320px,92vw)"><div style="padding:8px 12px"><strong>${esc(H.ROLES[u.role].person)}</strong><div class="xs muted">${esc(H.ROLES[u.role].label)} · ${u.role === 'operador' ? 'credencial + PIN' : 'sesión federada con el directorio corporativo'}</div></div><hr style="border:0;border-top:1px solid var(--sand-2)">
+      <div class="menu hide" role="menu" style="width:min(320px,92vw)"><div style="padding:8px 12px"><strong>${esc(H.ROLES[u.role].person)}</strong><div class="xs muted">${esc(H.ROLES[u.role].label)} · ${u.role === 'operador' ? 'toque de credencial, sin sesión' : 'sesión federada con el directorio corporativo'}</div></div><hr style="border:0;border-top:1px solid var(--sand-2)">
       <button role="menuitem" data-act="switchRole">${ico('users')} Cambiar de perfil (demostración)</button>
       <button role="menuitem" data-act="sun">${ico('sun')} Modo sol (alto contraste)</button>
       <button role="menuitem" data-act="big">${ico('eye')} Texto grande</button>
