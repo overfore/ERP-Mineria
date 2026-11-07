@@ -187,7 +187,7 @@ textarea{min-height:96px;resize:vertical}
 .pin-dots i.on{background:var(--slate)}
 
 /* ---------- Tablas ---------- */
-.tbl-wrap{overflow-x:auto;border:1px solid var(--sand-2);border-radius:12px;background:var(--white)}
+.tbl-wrap{position:relative;overflow-x:auto;border:1px solid var(--sand-2);border-radius:12px;background:var(--white)}
 table{border-collapse:collapse;width:100%;font-size:15px}
 th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--sand-2);vertical-align:middle}
 th{background:var(--steel-xl);font:600 13px var(--f-body);letter-spacing:.3px;color:var(--slate);white-space:nowrap}
@@ -335,7 +335,7 @@ canvas.sign{width:100%;height:140px;border:2px dashed var(--steel);border-radius
   .g-8-4{grid-template-columns:1fr}
 }
 @media (max-width:1023px){
-  .shell{grid-template-columns:1fr}
+  .shell{grid-template-columns:minmax(0,1fr)}
   .nav{position:fixed;z-index:80;left:0;top:var(--hdr);width:min(300px,86vw);transform:translateX(-102%);transition:transform .2s;box-shadow:var(--shadow)}
   .nav.open{transform:none}
   .menu-toggle{display:inline-grid}
@@ -346,6 +346,15 @@ canvas.sign{width:100%;height:140px;border:2px dashed var(--steel);border-radius
 @media (max-width:767px){
   .g2,.g3,.g4{grid-template-columns:1fr}
   .user-btn .nm{display:none}
+  .hdr{gap:4px;padding:0 10px}
+  .hdr>*{flex-shrink:0}
+  .hdr>.spacer{flex-shrink:1}
+  .hdr>a.ibtn[href="#/ayuda"]{display:none}
+  .hdr .brand{font-size:17px;gap:6px}
+  .hdr .brand-mark{width:34px;height:34px;box-shadow:none}
+  .user-btn{gap:4px;padding:0 4px}
+  .user-btn>svg{display:none}
+  .main{padding:var(--s4) 16px 96px}
   .conn .txt{display:none}
   .sect{padding:var(--s6) var(--s4)}
   .modal{padding:var(--s4)}
