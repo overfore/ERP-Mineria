@@ -11,10 +11,10 @@ H.ROLES = {
   supervisor: { label: 'Supervisor de turno mina', person: 'Camila Rojas Fuentes', ini: 'CR', desc: 'Atiende equipos detenidos, incidentes e inspecciones de su turno.', home: '#/inicio', ico: 'wrench', items: ['inicio', 'control', 'terreno', 'equipos', 'plan', 'perforacion', 'seguridad', 'tablero', 'ayuda'] },
   planificacion: { label: 'Planificación minera', person: 'Francisca Ledermann', ini: 'FL', desc: 'Versiona el plan semanal y revisa el cumplimiento del turno anterior.', home: '#/inicio', ico: 'cal', items: ['inicio', 'control', 'plan', 'perforacion', 'trazabilidad', 'equipos', 'tablero', 'ayuda'] },
   metalurgia: { label: 'Metalurgia y conciliación', person: 'Héctor Sanhueza', ini: 'HS', desc: 'Concilia mina–planta–embarque y explica cada diferencia por punto de la cadena.', home: '#/inicio', ico: 'scale', items: ['inicio', 'control', 'trazabilidad', 'conciliacion', 'terceros', 'tablero', 'ayuda'] },
-  seguridad: { label: 'Seguridad y salud ocupacional', person: 'Marcelo Tapia', ini: 'MT', desc: 'Acreditación de personas, incidentes y alertas de fatiga con acción documentada.', home: '#/inicio', ico: 'shield', items: ['inicio', 'acreditacion', 'seguridad', 'terceros', 'tablero', 'ayuda'] },
+  seguridad: { label: 'Seguridad y salud ocupacional', person: 'Marcelo Tapia', ini: 'MT', desc: 'Acreditación de personas, incidentes y alertas de fatiga con acción documentada.', home: '#/inicio', ico: 'shield', items: ['inicio', 'acreditacion', 'porteria', 'seguridad', 'terceros', 'tablero', 'ayuda'] },
   sustentabilidad: { label: 'Sustentabilidad y regulatorio', person: 'Paula Guerrero', ini: 'PG', desc: 'Reportes a la autoridad, huella de carbono y convenio con la comunidad.', home: '#/inicio', ico: 'leaf', items: ['inicio', 'ambiental', 'trazabilidad', 'tablero', 'ayuda'] },
   contratista: { label: 'Empresa contratista (externa)', person: 'Daniela Fuentes (Transportes Salar Grande)', ini: 'DF', desc: 'Acredita a sus trabajadores y sube documentos antes de que venzan.', home: '#/inicio', ico: 'badge', items: ['inicio', 'acreditacion', 'ayuda'] },
-  gerencia: { label: 'Gerencia general', person: 'Rodrigo Palma', ini: 'RP', desc: 'Vista ejecutiva: trazabilidad, conciliación, cumplimiento y continuidad operacional.', home: '#/inicio', ico: 'chart', items: ['inicio', 'control', 'trazabilidad', 'conciliacion', 'plan', 'perforacion', 'equipos', 'ambiental', 'tablero', 'conectividad', 'integrador', 'ayuda'] },
+  gerencia: { label: 'Gerencia general', person: 'Rodrigo Palma', ini: 'RP', desc: 'Vista ejecutiva: trazabilidad, conciliación, cumplimiento y continuidad operacional.', home: '#/inicio', ico: 'chart', items: ['inicio', 'control', 'trazabilidad', 'conciliacion', 'plan', 'perforacion', 'equipos', 'porteria', 'ambiental', 'tablero', 'conectividad', 'integrador', 'ayuda'] },
   admin: { label: 'Administración TI', person: 'Verónica Alcaíno', ini: 'VA', desc: 'Usuarios, roles, parámetros, auditoría y estado de la plataforma.', home: '#/inicio', ico: 'gear', items: ['inicio', 'control', 'terceros', 'conectividad', 'integrador', 'admin', 'ayuda'] }
 };
 H.NAV = [
@@ -29,6 +29,7 @@ H.NAV = [
     { id: 'equipos', l: 'Equipos y detenciones', h: '#/equipos', i: 'truck' }] },
   { g: 'Personas y cumplimiento', items: [
     { id: 'acreditacion', l: 'Acreditación', h: '#/acreditacion', i: 'badge' },
+    { id: 'porteria', l: 'Consola de portería', h: '#/porteria', i: 'lock' },
     { id: 'seguridad', l: 'Seguridad y fatiga', h: '#/seguridad', i: 'shield' },
     { id: 'ambiental', l: 'Ambiental y huella', h: '#/ambiental', i: 'leaf' },
     { id: 'terceros', l: 'Terceros', h: '#/terceros', i: 'bld' }] },

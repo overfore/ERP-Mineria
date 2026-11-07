@@ -5,6 +5,7 @@
    · Marcas de módulo, etapa (E1/E2) y NODO en la cabecera de cada pantalla
    · Integrador de Sistemas: un conector por cada sistema existente
    · Perforación y pozos (Operación Mina, RF-TER-006)
+   · Consola de portería (Acreditación y Acceso, criterio de aceptación 7)
    ===================================================================== */
 
 /* ---------- Marcas de módulo, etapa y NODO ---------- */
@@ -120,3 +121,57 @@ H.A.pzNew = () => H.modal({
     H.toast(H.Sim.lte === 'shadow' ? `<strong>${p.id} guardado en la tableta.</strong> Sin cobertura: sube solo al recuperar la señal.` : H.Sim.link === 'down' ? `<strong>${p.id} registrado en el Nodo de Faena.</strong> Sube a la nube al volver el enlace.` : `<strong>${p.id} registrado.</strong> Geología ya puede descargarlo.`, 'ok', 5000);
   } }]
 });
+
+/* ===== Consola de portería (Acreditación y Acceso · criterio 7) ===== */
+H.AC.trab = H.TRAB.map(t => `${t.nombre} · ${t.rut}`);
+const PT_LOG = [];
+{
+  const rL = rng(4242);
+  for (let i = 0; i < 14; i++) { const t = H.TRAB[Math.floor(rL() * H.TRAB.length)]; if (t.estado === 'Vencido' || t.estado === 'En revisión') continue; PT_LOG.push({ id: 'IN-' + (7100 + i), nombre: t.nombre, empresa: t.empresa, f: new Date(Date.now() - (8 + i * 23) * 60000), res: 'Ingresó', motivo: t.estado === 'Por vencer' ? 'Habilitado · documento por vencer, ya avisado' : 'Habilitado' }); }
+}
+const ptDemo = k => H.TRAB.find(t => k === 'ok' ? t.estado === 'Habilitado' : k === 'warn' ? t.estado === 'Por vencer' : t.estado === 'Vencido');
+const ptKpis = () => { const r = PT_LOG.filter(x => x.res !== 'Ingresó').length; return `${H.kpi('Ingresos del turno', PT_LOG.length - r, '', 'Turno día', 'neu')}${H.kpi('Rechazos del turno', r, '', 'Con motivo registrado', r ? 'bad' : 'neu')}${H.kpi('Rechazos por documento vencido', PT_LOG.filter(x => / vencido$/.test(x.motivo)).length, '', 'Cada uno con 3 avisos previos · antes, el 14 % de los rechazos llegaba sin aviso', 'neu')}${H.kpi('Avisos enviados antes de vencer', H.TRAB.filter(t => t.min <= 30).length, '', 'A 30, 15 y 7 días', 'neu')}`; };
+H.route('/porteria', {
+  title: 'Consola de portería', auth: true, item: 'porteria', crumbs: () => [['Inicio', '#/inicio'], ['Acreditación', '#/acreditacion'], ['Consola de portería', '#']],
+  render: () => `${H.pageH('Consola de portería', 'Lo que ve el guardia cuando una persona acerca su credencial. La consola consulta la habilitación en el Nodo de Faena, así que sigue funcionando aunque se corte la fibra. No usa reconocimiento facial: queda sujeto al acuerdo con el sindicato.', H.badge('Guardia: credencial y PIN al inicio del turno', 'dk'))}
+  <div class="grid g4" id="pt-k">${ptKpis()}</div>
+  <div class="grid g2 mt2">
+    ${H.card('Lectura de credencial', `<p class="small muted">En la faena la persona acerca su credencial al lector. Aquí puedes simularlo con tres casos o buscar a cualquier persona.</p>
+      <div class="pt-demo"><button class="btn sec" data-act="ptRead" data-k="ok">${ico('check')} Persona habilitada</button><button class="btn sec" data-act="ptRead" data-k="warn">${ico('clock')} Documento por vencer</button><button class="btn sec" data-act="ptRead" data-k="err">${ico('alert')} Documento vencido</button></div>
+      ${H.field({ id: 'pt-q', name: 'q', label: 'Buscar persona (nombre o RUT)', ac: 'trab', ph: 'Escribe un nombre…' })}
+      <button class="btn" data-act="ptRead" data-k="q">${ico('badge')} Validar</button>`)}
+    <section class="card" aria-live="polite" id="pt-res">${H.empty('Esperando credencial', 'Acerca una credencial al lector o usa uno de los casos de ejemplo.')}</section>
+  </div>
+  ${H.card('Bitácora del turno', '<div id="pt-t"></div>', { cls: 'mt2', sub: 'Cada ingreso y cada rechazo queda registrado con su motivo y vuelve al sistema de acceso existente, que se amplía con la habilitación de SITCO.' })}`,
+  mount: (m) => {
+    H.ptT = H.table($('#pt-t', m), {
+      caption: 'Ingresos y rechazos del turno', pageSize: 6, rows: PT_LOG, searchKeys: ['nombre', 'empresa', 'motivo'], searchPh: 'Buscar persona o empresa…',
+      filters: [{ key: 'res', label: 'Resultado', options: ['Ingresó', 'Rechazado'] }],
+      cols: [{ key: 'f', label: 'Hora', sortv: r => r.f.getTime(), render: r => ft(r.f) }, { key: 'nombre', label: 'Persona', render: r => `<strong>${esc(r.nombre)}</strong>` }, { key: 'empresa', label: 'Empresa' }, { key: 'res', label: 'Resultado', render: r => H.badge(r.res, r.res === 'Ingresó' ? 'ok' : 'err') }, { key: 'motivo', label: 'Motivo' }]
+    });
+  }
+});
+H.A.ptRead = el => {
+  let t;
+  if (el.dataset.k === 'q') { const v = ($('#pt-q').value || '').trim().toLowerCase(); t = v && H.TRAB.find(x => `${x.nombre} · ${x.rut}`.toLowerCase().includes(v) || x.rut.toLowerCase() === v); if (!t) { H.toast('No se encontró a esa persona. Revisa el nombre o el RUT.', 'warn'); $('#pt-q').focus(); return; } }
+  else t = ptDemo(el.dataset.k);
+  const venc = t.docs.slice().sort((a, b) => a.dias - b.dias)[0], dV = dOff(venc.dias);
+  const avisos = [30, 15, 7].map(n => fd(dOff(venc.dias - n)));
+  let k, head, body, act = '', res = 'Ingresó', motivo = 'Habilitado';
+  if (t.estado === 'Vencido') {
+    k = 'err'; head = 'No puede ingresar'; res = 'Rechazado'; motivo = `${venc.d} vencido`;
+    body = `<p><strong>${esc(venc.d)}</strong> venció el ${fd(dV)}.</p><p class="small">El sistema avisó a la persona, a ${esc(t.empresa)} y a Seguridad el ${avisos[0]}, el ${avisos[1]} y el ${avisos[2]}. Por eso este rechazo no debería ocurrir: la empresa tuvo 30 días para renovar.</p>`;
+    act = `<div class="row mt1"><a class="btn sec" href="#/acreditacion/${t.id}">Ver ficha</a><button class="btn ter" data-act="ptCall">Avisar a Seguridad</button></div>`;
+  } else if (t.estado === 'En revisión') {
+    k = 'warn'; head = 'Acreditación en revisión'; res = 'Rechazado'; motivo = 'Acreditación en revisión';
+    body = '<p class="small">La persona aún no está habilitada. Seguridad revisa sus documentos; no puede ingresar hasta que se apruebe.</p>';
+  } else if (t.estado === 'Por vencer') {
+    k = 'ok'; head = 'Puede ingresar'; motivo = 'Habilitado · documento por vencer, ya avisado';
+    body = `<p class="small"><strong>Aviso:</strong> ${esc(venc.d)} vence el ${fd(dV)} (en ${venc.dias} días). Ya se avisó a la persona, a su empleador y a Seguridad.</p>`;
+  } else { k = 'ok'; head = 'Puede ingresar'; body = '<p class="small">Todos sus documentos están vigentes.</p>'; }
+  $('#pt-res').innerHTML = `<div class="pt-res ${k}" role="status"><div class="pt-ico">${ico(k === 'ok' ? 'check' : 'alert')}</div><div class="grow"><div class="pt-head">${head}</div><div class="small"><strong>${esc(t.nombre)}</strong> · ${esc(t.rut)}<br>${esc(t.cargo)} · ${esc(t.empresa)}</div></div></div>${body}${act}`;
+  PT_LOG.unshift({ id: uid('IN'), nombre: t.nombre, empresa: t.empresa, f: new Date(), res, motivo });
+  if (H.ptT) H.ptT.setRows(PT_LOG); const kp = $('#pt-k'); if (kp) kp.innerHTML = ptKpis();
+  H.Sim.capture('acceso', `${res === 'Ingresó' ? 'Ingreso' : 'Rechazo'} en portería · ${t.nombre}`, 'Consola de Portería');
+};
+H.A.ptCall = () => H.toast('Aviso enviado a Seguridad con el motivo del rechazo (simulado).', 'ok');
