@@ -80,6 +80,16 @@ Decidimos **simular** en vez de construir un sistema real, porque lo que se eval
 
 RT-25.01 (máximo de tres interacciones) no está medido todavía.
 
+## Antecedentes
+
+La carpeta [`antecedentes/`](antecedentes) reúne los documentos de los que sale el prototipo. Está dividida en tres partes:
+
+| Carpeta | Qué contiene | Para qué sirve |
+|---|---|---|
+| [`antecedentes/correo/`](antecedentes/correo) | `Informe3_Aclaraciones_TFEP-01-2026.md`: el comunicado de aclaraciones del Informe 3 | Una parte explica qué es el prototipo y qué se pide en esta entrega (un avance navegable) |
+| [`antecedentes/documentos/`](antecedentes/documentos) | Subdocumento 3 y sus anexos, Subdocumento 4 y sus anexos, y los Formularios T-11 y T-12 (PDF) | Describen la solución y la arquitectura que el prototipo muestra |
+| [`antecedentes/bases md/`](antecedentes/bases%20md) | `bases-administrativas.md`, `bases-tecnicas-caso-mineria.md` y `bases-tecnicas-transversales.md` | Las tres bases de la licitación: lo que se necesita y cómo debe ser el prototipo |
+
 ## Supuestos y límites
 
 - **Todos los datos son ficticios.** Empresa, personas, lotes, equipos y cifras son de demostración.
@@ -102,6 +112,7 @@ js/data.js          Datos de demostración, perfiles y menú
 js/sim.js           Simulación de conectividad (equipo → Nodo de Faena → nube)
 js/app.js           Enrutador, estructura general y recorrido guiado
 js/views-*.js       Pantallas por área (públicas, operación, personas, administración, documentación, centro de control)
+antecedentes/       Documentos de referencia: correo, documentos de la solución y bases
 ```
 
 ## Accesibilidad
