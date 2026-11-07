@@ -4,6 +4,7 @@
    solución (Subdocumento 3):
    · Marcas de módulo, etapa (E1/E2) y NODO en la cabecera de cada pantalla
    · Integrador de Sistemas: un conector por cada sistema existente
+   · Perforación y pozos (Operación Mina, RF-TER-006)
    ===================================================================== */
 
 /* ---------- Marcas de módulo, etapa y NODO ---------- */
@@ -64,3 +65,58 @@ H.A.intTestAll = () => {
   const ok = H.SISTEMAS.filter(s => s.lat && intEstado(s).k === 'ok').length, w = H.SISTEMAS.filter(s => s.lat).length - ok;
   H.toast(`Prueba completa: <strong>${ok} conectores responden</strong>${w ? `, ${w} con aviso (revisa la columna Estado)` : ''}.`, w ? 'warn' : 'ok', 5500);
 };
+
+/* ===== Perforación y pozos (Operación Mina) ===== */
+H.POZOS.forEach((p, i) => { p.poli = H.POLIS[(i * 7) % H.POLIS.length].id; });
+const PF_SIN = ['PF-03', 'PF-04', 'PF-05', 'PF-06', 'PF-07', 'PF-08', 'PF-09'];
+const durCls = d => d >= 75 ? 'Dura' : d >= 55 ? 'Media' : 'Blanda';
+const pzTurno = () => H.POZOS.filter(p => Date.now() - p.f.getTime() < 12 * 3600e3);
+H.route('/perforacion', {
+  title: 'Perforación y pozos', auth: true, item: 'perforacion', crumbs: () => [['Inicio', '#/inicio'], ['Perforación y pozos', '#']],
+  render: () => {
+    const avg = Math.round(H.POZOS.reduce((a, p) => a + p.dur, 0) / H.POZOS.length);
+    const byPoli = {}; H.POZOS.forEach(p => { (byPoli[p.poli] = byPoli[p.poli] || []).push(p.dur); });
+    const polis = Object.keys(byPoli).slice(0, 8);
+    return `${H.pageH('Perforación y pozos', 'Cada pozo queda registrado con su profundidad y su índice de dureza. Las dos perforadoras instrumentadas lo envían solas; las siete sin instrumentación lo registran en la App SITCO Terreno. Geología descarga los pozos desde aquí, sin planillas.', `<button class="btn sec" data-act="pzExport">${ico('dl')} Descargar para Geología</button><button class="btn" data-act="pzNew">${ico('plus')} Registrar pozo</button>`)}
+    <div class="grid g4">${H.kpi('Pozos del turno', `<span id="pz-n">${pzTurno().length}</span>`, '', 'Turno día · 08:00 a 20:00', 'neu')}${H.kpi('Perforadoras instrumentadas', 2, 'de 9', 'Las otras 7 registran en la App SITCO Terreno', 'neu')}${H.kpi('Índice de dureza promedio', avg, '', 'Escala 0 a 100 · valores de ejemplo', 'neu')}${H.kpi('Pozos sin registro digital', 0, '', 'Antes: libreta y planilla al final del turno', 'good')}</div>
+    <div class="mt2">${H.tabs([{ id: 'p', label: 'Pozos' }, { id: 'd', label: 'Dureza por polígono' }, { id: 'c', label: 'Cómo se registra' }], 'p', {
+      p: '<div id="pz-t"></div>',
+      d: `<div class="card">${H.C.hbar({ labels: polis, values: polis.map(k => Math.round(byPoli[k].reduce((a, b) => a + b, 0) / byPoli[k].length)), fmt: v => String(v), ml: 110, label: 'Índice de dureza promedio por polígono' })}<p class="small muted">La dureza ayuda a planificar la tronadura y a anticipar el rendimiento en la planta. Valores de ejemplo.</p></div>`,
+      c: `<div class="grid g2"><div class="card flat"><h3>${ico('zap')} Perforadora instrumentada (PF-01 y PF-02)</h3><p class="small">El equipo mide la profundidad y la energía de perforación. El Integrador recibe el dato y calcula el índice de dureza sin que el operador haga nada.</p></div><div class="card flat"><h3>${ico('phone')} Perforadora sin instrumentación (PF-03 a PF-09)</h3><p class="small">El operador registra el pozo en la App SITCO Terreno con botones grandes, al terminar cada pozo. Si no hay señal, el registro queda en la tableta y sube solo al Nodo de Faena.</p></div></div>`
+    })}</div>`;
+  },
+  mount: (m) => {
+    H.pzT = H.table($('#pz-t', m), {
+      caption: 'Pozos perforados', pageSize: 8, rows: H.POZOS, searchKeys: ['id', 'poli', 'pf'], searchPh: 'Buscar pozo, polígono o perforadora…',
+      filters: [{ key: 'origen', label: 'Origen', options: ['Instrumentada', 'App SITCO Terreno'] }, { key: 'pf', label: 'Perforadora', options: ['PF-01', 'PF-02', ...PF_SIN] }],
+      bulk: [{ label: 'Exportar selección', fn: (ids, done) => { pzCsv(H.POZOS.filter(p => ids.includes(p.id))); done(); } }],
+      cols: [
+        { key: 'id', label: 'Pozo', render: r => `<strong>${r.id}</strong>` },
+        { key: 'poli', label: 'Polígono' },
+        { key: 'pf', label: 'Perforadora' },
+        { key: 'prof', label: 'Profundidad', num: true, render: r => nd(r.prof, 1) + ' m' },
+        { key: 'dur', label: 'Dureza', num: true, render: r => `${r.dur} · ${durCls(r.dur)}` },
+        { key: 'agua', label: 'Agua' },
+        { key: 'origen', label: 'Origen', render: r => H.badge(r.origen, r.origen === 'Instrumentada' ? '' : 'cu') },
+        { key: 'f', label: 'Hora', sortv: r => r.f.getTime(), render: r => fdt(r.f) }]
+    });
+  }
+});
+const pzCsv = rows => { H.csv('pozos.csv', ['Pozo', 'Polígono', 'Perforadora', 'Profundidad (m)', 'Diámetro (mm)', 'Índice de dureza', 'Agua', 'Origen', 'Fecha y hora'], rows.map(p => [p.id, p.poli, p.pf, p.prof, p.diam, p.dur, p.agua, p.origen, fdt(p.f)])); H.toast(`${rows.length} pozos descargados en CSV.`, 'ok'); };
+H.A.pzExport = () => pzCsv(H.POZOS);
+H.A.pzNew = () => H.modal({
+  title: 'Registrar pozo (App SITCO Terreno)',
+  body: `<p class="small muted">Así lo registra el operador de una perforadora sin instrumentación. Turno, hora y posición se completan solos.</p>
+  ${H.field({ id: 'pz-pf', name: 'pf', label: 'Perforadora', type: 'select', options: PF_SIN })}
+  ${H.field({ id: 'pz-po', name: 'po', label: 'Polígono', ac: 'polis', v: 'required', hint: 'Empieza a escribir: B30…' })}
+  ${H.field({ id: 'pz-pr', name: 'pr', label: 'Profundidad (m)', type: 'number', v: 'required|gt0', value: '15', extra: 'min="1" max="40" step="0.1"', inputmode: 'decimal' })}
+  ${H.field({ id: 'pz-du', name: 'du', label: 'Cómo se sintió el terreno', type: 'select', options: [{ v: 45, l: 'Blando' }, { v: 65, l: 'Medio' }, { v: 82, l: 'Duro' }], value: 65, hint: 'Sin instrumentación, la dureza se estima por la percepción del operador y se ajusta con la tronadura.' })}
+  ${H.field({ id: 'pz-ag', name: 'ag', label: '¿Encontró agua?', type: 'select', options: ['No', 'Sí'] })}`,
+  actions: [{ label: 'Cancelar', kind: 'sec' }, { label: 'Registrar pozo', onClick: (api, o) => {
+    if (!H.validate(o)) return false;
+    const p = { id: 'PZ-' + (4800 + H.POZOS.length), poli: $('#pz-po', o).value, pf: $('#pz-pf', o).value, prof: +$('#pz-pr', o).value, diam: 311, dur: +$('#pz-du', o).value, agua: $('#pz-ag', o).value, origen: 'App SITCO Terreno', f: new Date() };
+    H.POZOS.unshift(p); H.Sim.capture('pozo', `Pozo ${p.id} · ${p.pf} · ${p.poli}`, 'App SITCO Terreno');
+    if (H.pzT) H.pzT.setRows(H.POZOS); const n = $('#pz-n'); if (n) n.textContent = pzTurno().length;
+    H.toast(H.Sim.lte === 'shadow' ? `<strong>${p.id} guardado en la tableta.</strong> Sin cobertura: sube solo al recuperar la señal.` : H.Sim.link === 'down' ? `<strong>${p.id} registrado en el Nodo de Faena.</strong> Sube a la nube al volver el enlace.` : `<strong>${p.id} registrado.</strong> Geología ya puede descargarlo.`, 'ok', 5000);
+  } }]
+});

@@ -8,13 +8,13 @@ H.BRAND = { product: 'SITCO Aranda', vendor: 'OVERFORE', client: 'Compañía Min
 /* ---------- Perfiles de persona usuaria ---------- */
 H.ROLES = {
   operador: { label: 'Operador de pala', person: 'Eleodoro Painemal', ini: 'EP', desc: 'Opera la pala PA-03 en turno. Guantes, sol, sin señal en el fondo del rajo.', home: '#/terreno', ico: 'truck', items: ['inicio', 'terreno', 'ayuda'] },
-  supervisor: { label: 'Supervisor de turno mina', person: 'Camila Rojas Fuentes', ini: 'CR', desc: 'Atiende equipos detenidos, incidentes e inspecciones de su turno.', home: '#/inicio', ico: 'wrench', items: ['inicio', 'control', 'terreno', 'equipos', 'plan', 'seguridad', 'tablero', 'ayuda'] },
-  planificacion: { label: 'Planificación minera', person: 'Francisca Ledermann', ini: 'FL', desc: 'Versiona el plan semanal y revisa el cumplimiento del turno anterior.', home: '#/inicio', ico: 'cal', items: ['inicio', 'control', 'plan', 'trazabilidad', 'equipos', 'tablero', 'ayuda'] },
+  supervisor: { label: 'Supervisor de turno mina', person: 'Camila Rojas Fuentes', ini: 'CR', desc: 'Atiende equipos detenidos, incidentes e inspecciones de su turno.', home: '#/inicio', ico: 'wrench', items: ['inicio', 'control', 'terreno', 'equipos', 'plan', 'perforacion', 'seguridad', 'tablero', 'ayuda'] },
+  planificacion: { label: 'Planificación minera', person: 'Francisca Ledermann', ini: 'FL', desc: 'Versiona el plan semanal y revisa el cumplimiento del turno anterior.', home: '#/inicio', ico: 'cal', items: ['inicio', 'control', 'plan', 'perforacion', 'trazabilidad', 'equipos', 'tablero', 'ayuda'] },
   metalurgia: { label: 'Metalurgia y conciliación', person: 'Héctor Sanhueza', ini: 'HS', desc: 'Concilia mina–planta–embarque y explica cada diferencia por punto de la cadena.', home: '#/inicio', ico: 'scale', items: ['inicio', 'control', 'trazabilidad', 'conciliacion', 'terceros', 'tablero', 'ayuda'] },
   seguridad: { label: 'Seguridad y salud ocupacional', person: 'Marcelo Tapia', ini: 'MT', desc: 'Acreditación de personas, incidentes y alertas de fatiga con acción documentada.', home: '#/inicio', ico: 'shield', items: ['inicio', 'acreditacion', 'seguridad', 'terceros', 'tablero', 'ayuda'] },
   sustentabilidad: { label: 'Sustentabilidad y regulatorio', person: 'Paula Guerrero', ini: 'PG', desc: 'Reportes a la autoridad, huella de carbono y convenio con la comunidad.', home: '#/inicio', ico: 'leaf', items: ['inicio', 'ambiental', 'trazabilidad', 'tablero', 'ayuda'] },
   contratista: { label: 'Empresa contratista (externa)', person: 'Daniela Fuentes (Transportes Salar Grande)', ini: 'DF', desc: 'Acredita a sus trabajadores y sube documentos antes de que venzan.', home: '#/inicio', ico: 'badge', items: ['inicio', 'acreditacion', 'ayuda'] },
-  gerencia: { label: 'Gerencia general', person: 'Rodrigo Palma', ini: 'RP', desc: 'Vista ejecutiva: trazabilidad, conciliación, cumplimiento y continuidad operacional.', home: '#/inicio', ico: 'chart', items: ['inicio', 'control', 'trazabilidad', 'conciliacion', 'plan', 'equipos', 'ambiental', 'tablero', 'conectividad', 'integrador', 'ayuda'] },
+  gerencia: { label: 'Gerencia general', person: 'Rodrigo Palma', ini: 'RP', desc: 'Vista ejecutiva: trazabilidad, conciliación, cumplimiento y continuidad operacional.', home: '#/inicio', ico: 'chart', items: ['inicio', 'control', 'trazabilidad', 'conciliacion', 'plan', 'perforacion', 'equipos', 'ambiental', 'tablero', 'conectividad', 'integrador', 'ayuda'] },
   admin: { label: 'Administración TI', person: 'Verónica Alcaíno', ini: 'VA', desc: 'Usuarios, roles, parámetros, auditoría y estado de la plataforma.', home: '#/inicio', ico: 'gear', items: ['inicio', 'control', 'terceros', 'conectividad', 'integrador', 'admin', 'ayuda'] }
 };
 H.NAV = [
@@ -25,6 +25,7 @@ H.NAV = [
     { id: 'trazabilidad', l: 'Trazabilidad de lotes', h: '#/trazabilidad', i: 'route' },
     { id: 'conciliacion', l: 'Conciliación metalúrgica', h: '#/conciliacion', i: 'scale' },
     { id: 'plan', l: 'Plan minero y versiones', h: '#/plan', i: 'cal' },
+    { id: 'perforacion', l: 'Perforación y pozos', h: '#/perforacion', i: 'drill' },
     { id: 'equipos', l: 'Equipos y detenciones', h: '#/equipos', i: 'truck' }] },
   { g: 'Personas y cumplimiento', items: [
     { id: 'acreditacion', l: 'Acreditación', h: '#/acreditacion', i: 'badge' },
@@ -70,6 +71,15 @@ H.SISTEMAS = [
   { id: 'SYS-09', n: 'Acceso de portería', t: 'Se amplía', dir: 'Ida y vuelta', loc: 'faena', mod: 'Acreditación y Acceso', e: 'E1', q: 'Recibe la habilitación vigente de cada persona y devuelve los ingresos y rechazos.', lat: 45 },
   { id: 'SYS-10', n: 'Planillas y carpetas', t: 'Se reemplaza', dir: '—', loc: '—', mod: 'Todos', e: 'E1 y E2', q: 'Dejan de ser el sistema de registro; su historia se migra y quedan como consulta.', lat: 0 }
 ];
+
+/* ---------- Perforación: pozos del turno (RF-TER-006) ---------- */
+{
+  const rP = rng(909), PERF = ['PF-01', 'PF-02', 'PF-03', 'PF-04', 'PF-05', 'PF-06', 'PF-07', 'PF-08', 'PF-09'];
+  H.POZOS = Array.from({ length: 36 }, (_, i) => {
+    const pf = PERF[Math.floor(rP() * 9)], inst = pf === 'PF-01' || pf === 'PF-02';
+    return { id: 'PZ-' + (4800 + i), poli: null, pf, prof: +(13 + rP() * 4).toFixed(1), diam: pf === 'PF-09' ? 251 : 311, dur: Math.round(38 + rP() * 54), agua: rP() < .18 ? 'Sí' : 'No', origen: inst ? 'Instrumentada' : 'App SITCO Terreno', f: new Date(Date.now() - (12 + i * 41) * 60000) };
+  });
+}
 
 /* ---------- Generadores base ---------- */
 const R = rng(2026);
