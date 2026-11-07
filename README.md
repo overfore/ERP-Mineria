@@ -5,7 +5,7 @@ Prototipo navegable para la propuesta de la Compañía Minera Altos de Aranda S.
 
 > Es una **simulación**: no hay servidor, base de datos ni nube reales. Todo corre en el navegador con datos de demostración, para mostrar cómo se vería y cómo se comportaría la plataforma.
 
-> **Estado (5 de noviembre de 2026).** Este repositorio es la versión de referencia del prototipo. Se migrará a Angular. Los cambios de contenido acordados ese día (botonera, nombre SITCO Aranda, límite de arsénico y ayudas emergentes) ya están en este código. Los de estilos y comportamiento siguen pendientes y se detallan en [Cambios acordados pendientes](#cambios-acordados-pendientes).
+> **Estado (5 de noviembre de 2026).** Este repositorio es la versión de referencia del prototipo. Se migrará a Angular. Los cambios de contenido acordados ese día (botonera, nombre SITCO Aranda, límite de arsénico y ayudas emergentes) ya están en este código. Los de estilos y comportamiento siguen pendientes y se detallan en [Cambios acordados pendientes](#cambios-acordados-pendientes). El 7 de noviembre se agregaron las piezas que faltaban para calzar con los módulos de la solución y se corrigió el diseño responsivo.
 
 ---
 
@@ -32,8 +32,12 @@ Una aplicación web de una sola página (HTML, CSS y JavaScript puros, sin depen
 - **9 perfiles de usuario** con menú, inicio y permisos propios: operador de pala, supervisor de turno, planificación, metalurgia, seguridad, sustentabilidad, contratista, gerencia y administración TI. Si un perfil entra a una sección que no le corresponde, ve "Acceso restringido": es el control de acceso por roles.
 - **Trazabilidad de lotes** de la mina al embarque, con reconstrucción del origen de cada lote, ciclo completo y una excepción por arsénico.
 - **Conciliación metalúrgica**, plan minero con versiones, y flota de equipos con detenciones.
+- **Perforación y pozos** (Operación Mina): pozos con profundidad e índice de dureza, registro desde la App SITCO Terreno para las siete perforadoras sin instrumentación y descarga en CSV para Geología.
 - **Centro de control**: despacho de palas y camiones en movimiento, mapa del rajo, geotecnia, modelo 3D por bloques y arquitectura isométrica equipo → Nodo de Faena → nube.
 - **Acreditación de personas**, seguridad y fatiga, ambiental y huella de carbono, y gestión de terceros.
+- **Consola de portería** (Acreditación y Acceso): lo que ve el guardia al leer una credencial. Muestra si la persona puede ingresar y, si tiene un documento vencido, los tres avisos previos que envió el sistema (criterio de aceptación 7). Funciona sin enlace y deja bitácora de ingresos y rechazos.
+- **Integrador de sistemas**: los diez sistemas existentes con su tratamiento (se integra, solo lectura, se amplía o se reemplaza), qué intercambia cada conector, dónde corre y su estado. Reacciona al simulador de corte: los conectores que van a la nube pasan a "En bandeja de salida".
+- **Módulo, etapa y NODO en cada pantalla**: bajo el título se indica a qué módulo de la solución pertenece y sus marcas E1, E2 y NODO, como en la imagen de módulos. La arquitectura de información tiene una pestaña "Módulos de la solución" con el cruce completo.
 - **Tablero analítico** con filtros, exportación simulada y desglose por indicador.
 - **Terreno**: dos vistas.
   - **Operador de pala: la Botonera de Pala**, como la Figura 3.10 del Subdocumento 3. Cuatro botones de destino (planta, baja ley, estéril y borde), una luz que marca el destino del plan y el toque de credencial al inicio del turno. No hay pantalla, formularios ni PIN. Los registros se guardan sin señal y se envían al volver el enlace.
@@ -67,13 +71,14 @@ Decidimos **simular** en vez de construir un sistema real, porque lo que se eval
 |---|---|
 | RT-25.02 Retroalimentación visual | Sí: esqueletos de carga, avisos, validaciones y mensajes de error. |
 | RT-25.03 WCAG 2.2 AA | Parcial. Ver [Accesibilidad](#accesibilidad). |
-| RT-25.04 Responsivo | Parcial. Sin desborde en 1366 × 768. Con desborde en 768 y 375 px de ancho; pendiente. |
+| RT-25.04 Responsivo | Sí: sin desborde horizontal en 1920 × 1080, 1366 × 768, 1024 × 768, 768 × 1024 y 375 × 812, revisado pantalla por pantalla el 7 de noviembre de 2026. |
 | RT-25.05 Sistema de diseño | Sí: pantalla `/sistema-diseno` con cinco colores base y dos familias tipográficas. |
 | RT-25.06 Enlace navegable en línea | Pendiente: aún no está publicado. |
 | RT-25.07 Acceso por 6 meses | Pendiente: depende de la publicación. |
 | RT-25.08 Interactividad simulada | Sí: navegación completa, ingreso y validación simulados, carga de archivos, desplegables y estados. |
 | RT-25.09 Arquitectura de información | Sí: pantalla `/arquitectura-informacion` con mapa del sitio, diagrama de navegación, taxonomía y menús por perfil. |
 | RT-25.10 Exportación a documento interactivo (deseable) | No. |
+| Criterio 7 | La consola de portería rechaza a quien tiene un documento vencido y muestra los avisos que se enviaron a 30, 15 y 7 días. |
 | Criterio 13 | El simulador de nube muestra la operación local desde el Nodo de Faena durante hasta 48 h y la sincronización automática al volver el enlace. |
 | Criterio 14 | La botonera registra el cambio de destino con un toque en el botón de destino, sin teclear ni pantalla táctil. |
 | Componentes del 25.4: información contextual emergente | Sí: ayudas con globo en indicadores con línea base, en el límite de arsénico y en la autonomía sin enlace. Se abren con el mouse o el teclado y se cierran con Esc. |
@@ -125,7 +130,8 @@ Qué se hace con los sistemas que la compañía ya tiene:
 - **No muestra verificación facial.** El caso declara una objeción sindical a la biometría en portería, y el Subdocumento 3 deja la verificación facial sujeta a un acuerdo con el sindicato.
 - Las exportaciones a PDF y XLSX son simuladas; el CSV descarga datos solo en las pantallas que lo entregan.
 - Los mapas, el modelo 3D y la imagen del login son **ilustraciones esquemáticas generadas por código**, no datos reales ni fotos de una mina.
-- No cubre toda la propuesta: es un avance. No incluye la Consola de Portería ni el Portal para Compradores, que el numeral 25.2 no exige. El pipeline DevSecOps se documenta en la propuesta, no está en el prototipo.
+- No cubre toda la propuesta: es un avance. No incluye el Portal para Compradores, que el numeral 25.2 no exige. El pipeline DevSecOps se documenta en la propuesta, no está en el prototipo.
+- La **etapa de cada conector** del Integrador se asignó según el módulo que lo usa (por ejemplo, telemetría en E2 porque la usa Equipos y Mantenimiento). El Subdocumento 3 marca al Integrador completo como E1.
 
 ## Estructura
 
@@ -138,6 +144,7 @@ js/data.js          Datos de demostración, perfiles y menú
 js/sim.js           Simulación de conectividad (equipo → Nodo de Faena → nube)
 js/app.js           Enrutador, estructura general y recorrido guiado
 js/views-*.js       Pantallas por área (públicas, operación, personas, administración, documentación, centro de control)
+js/views-modulos.js Integrador de sistemas, perforación, consola de portería y marcas de módulo y etapa
 antecedentes/       Documentos de referencia: correo, documentos de la solución, bases e imágenes
 ```
 
@@ -157,9 +164,8 @@ No está comprobado: el uso con un lector de pantalla real, el modo de alto cont
 
 Acordados el 5 de noviembre de 2026. Se harán en la versión Angular.
 
-1. **Responsivo (RT-25.04):** que la cabecera quepa en 375 px y que las tablas y pestañas anchas tengan su propio desplazamiento. Hoy hay desborde horizontal en 768 y 375 px de ancho.
-2. **Objetivos táctiles de 44 × 44 px** en todos los controles, incluidos los encabezados de columna de las tablas, las casillas de fila, las fichas de camión del mapa y el cierre de notificaciones.
-3. **Pausa del movimiento** del mapa de despacho (WCAG 2.2.2, nivel A): hoy los camiones se mueven solos y no hay forma de detenerlos. Debe haber un interruptor "Pausar movimiento", y el mapa debe partir pausado si el sistema pide reducir animaciones.
+1. **Objetivos táctiles de 44 × 44 px** en todos los controles, incluidos los encabezados de columna de las tablas, las casillas de fila, las fichas de camión del mapa y el cierre de notificaciones.
+2. **Pausa del movimiento** del mapa de despacho (WCAG 2.2.2, nivel A): hoy los camiones se mueven solos y no hay forma de detenerlos. Debe haber un interruptor "Pausar movimiento", y el mapa debe partir pausado si el sistema pide reducir animaciones.
 
 ## Cambios acordados ya implementados
 
@@ -178,3 +184,10 @@ Hechos el 5 y 6 de noviembre de 2026 en este código.
 - **Autoría:** los registros y las versiones del plan quedan a nombre de la persona que los hace.
 - **Coherencia de cifras:** tres fabricantes de telemetría, indicadores de la compañía rotulados como "meta interna", conciliación sin cifras contradictorias y valores de ejemplo avisados como tales.
 - **Mapa del sitio** con el Centro de control, y color de los gráficos con contraste suficiente.
+
+Hechos el 7 de noviembre de 2026, tras revisar el prototipo contra los módulos de la solución y el capítulo 25:
+
+- **Integrador de sistemas**, **Perforación y pozos** y **Consola de portería**, descritos en [Qué hicimos](#qué-hicimos).
+- **Marcas de módulo, E1, E2 y NODO** bajo el título de cada pantalla, y pestaña "Módulos de la solución" en la arquitectura de información.
+- **Responsivo (RT-25.04):** la cabecera cabe en 375 px, el contenido ya no ensancha la página en pantallas angostas, las tablas con texto oculto para lector de pantalla ya no desbordan y la vista de terreno vuelve a dos columnas en escritorio.
+- **Ayuda:** la pregunta sobre portería dice ahora 30, 15 y 7 días, igual que los parámetros.
