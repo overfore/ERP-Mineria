@@ -14,8 +14,8 @@ H.ROLES = {
   seguridad: { label: 'Seguridad y salud ocupacional', person: 'Marcelo Tapia', ini: 'MT', desc: 'Acreditación de personas, incidentes y alertas de fatiga con acción documentada.', home: '#/inicio', ico: 'shield', items: ['inicio', 'acreditacion', 'seguridad', 'terceros', 'tablero', 'ayuda'] },
   sustentabilidad: { label: 'Sustentabilidad y regulatorio', person: 'Paula Guerrero', ini: 'PG', desc: 'Reportes a la autoridad, huella de carbono y convenio con la comunidad.', home: '#/inicio', ico: 'leaf', items: ['inicio', 'ambiental', 'trazabilidad', 'tablero', 'ayuda'] },
   contratista: { label: 'Empresa contratista (externa)', person: 'Daniela Fuentes (Transportes Salar Grande)', ini: 'DF', desc: 'Acredita a sus trabajadores y sube documentos antes de que venzan.', home: '#/inicio', ico: 'badge', items: ['inicio', 'acreditacion', 'ayuda'] },
-  gerencia: { label: 'Gerencia general', person: 'Rodrigo Palma', ini: 'RP', desc: 'Vista ejecutiva: trazabilidad, conciliación, cumplimiento y continuidad operacional.', home: '#/inicio', ico: 'chart', items: ['inicio', 'control', 'trazabilidad', 'conciliacion', 'plan', 'equipos', 'ambiental', 'tablero', 'conectividad', 'ayuda'] },
-  admin: { label: 'Administración TI', person: 'Verónica Alcaíno', ini: 'VA', desc: 'Usuarios, roles, parámetros, auditoría y estado de la plataforma.', home: '#/inicio', ico: 'gear', items: ['inicio', 'control', 'terceros', 'conectividad', 'admin', 'ayuda'] }
+  gerencia: { label: 'Gerencia general', person: 'Rodrigo Palma', ini: 'RP', desc: 'Vista ejecutiva: trazabilidad, conciliación, cumplimiento y continuidad operacional.', home: '#/inicio', ico: 'chart', items: ['inicio', 'control', 'trazabilidad', 'conciliacion', 'plan', 'equipos', 'ambiental', 'tablero', 'conectividad', 'integrador', 'ayuda'] },
+  admin: { label: 'Administración TI', person: 'Verónica Alcaíno', ini: 'VA', desc: 'Usuarios, roles, parámetros, auditoría y estado de la plataforma.', home: '#/inicio', ico: 'gear', items: ['inicio', 'control', 'terceros', 'conectividad', 'integrador', 'admin', 'ayuda'] }
 };
 H.NAV = [
   { g: 'Operación', items: [
@@ -34,6 +34,7 @@ H.NAV = [
   { g: 'Análisis', items: [{ id: 'tablero', l: 'Tablero analítico', h: '#/tablero', i: 'chart' }] },
   { g: 'Plataforma', items: [
     { id: 'conectividad', l: 'Conectividad y nube', h: '#/conectividad', i: 'cloud' },
+    { id: 'integrador', l: 'Integrador de sistemas', h: '#/integrador', i: 'link' },
     { id: 'admin', l: 'Administración', h: '#/admin/usuarios', i: 'gear' },
     { id: 'ayuda', l: 'Ayuda y accesibilidad', h: '#/ayuda', i: 'help' }] }
 ];
@@ -54,6 +55,21 @@ H.MODULOS = [
   { id: 'int', n: 'Integrador de Sistemas', g: 'Integración', d: 'Un conector por cada sistema existente', e: ['E1'], nodo: true, items: ['integrador'] }
 ];
 H.modOf = item => H.MODULOS.find(m => m.items.includes(item));
+
+/* ---------- Sistemas existentes y su conector (Subdocumento 3, 3.3.2.2) ----------
+   t: tratamiento · dir: sentido del dato · loc: 'faena' (el conector corre en el Nodo) o 'nube' · mod: módulo que lo usa. */
+H.SISTEMAS = [
+  { id: 'SYS-01', n: 'SAP S/4HANA', t: 'Se integra', dir: 'Ida y vuelta', loc: 'nube', mod: 'Administración, Equipos, Trazabilidad', e: 'E1', q: 'Avisos de falla, pautas, guías de despacho y cierre de conciliación. SAP sigue siendo el sistema de registro y emite los documentos.', lat: 420 },
+  { id: 'SYS-02', n: 'Despacho de flota', t: 'Se integra', dir: 'Ida y vuelta', loc: 'faena', mod: 'Operación Mina', e: 'E1', q: 'Viajes, cargas y destino de cada camión; recibe la versión vigente del plan.', lat: 35 },
+  { id: 'SYS-03', n: 'Laboratorio', t: 'Se integra', dir: 'Ida y vuelta', loc: 'faena', mod: 'Trazabilidad y Embarque', e: 'E1', q: 'Muestras y resultados de ley y arsénico, sin transcripción.', lat: 60 },
+  { id: 'SYS-04', n: 'Telemetría de fabricantes (3 portales)', t: 'Se integra', dir: 'Entrada', loc: 'nube', mod: 'Equipos y Mantenimiento', e: 'E2', q: 'Alarmas, horas, consumos y códigos de falla de camiones, palas y perforadoras.', lat: 640 },
+  { id: 'SYS-05', n: 'Control de fatiga', t: 'Se integra', dir: 'Entrada', loc: 'faena', mod: 'Seguridad y Salud Ocupacional', e: 'E2', q: 'Alertas de somnolencia y distracción, para documentar la acción.', lat: 40 },
+  { id: 'SYS-06', n: 'Historiador de proceso', t: 'Solo lectura', dir: 'Entrada', loc: 'faena', mod: 'Conciliación Metalúrgica', e: 'E1', q: 'Balanza de alimentación y variables de planta, por diodo de datos desde la red de control.', lat: 55 },
+  { id: 'SYS-07', n: 'Planificación minera', t: 'Solo lectura', dir: 'Entrada', loc: 'nube', mod: 'Operación Mina', e: 'E1', q: 'Plan semanal y polígonos con ley estimada.', lat: 380 },
+  { id: 'SYS-08', n: 'Báscula de camiones', t: 'Solo lectura', dir: 'Entrada', loc: 'faena', mod: 'Conciliación Metalúrgica', e: 'E1', q: 'Pesaje de control y de despacho a puerto.', lat: 30 },
+  { id: 'SYS-09', n: 'Acceso de portería', t: 'Se amplía', dir: 'Ida y vuelta', loc: 'faena', mod: 'Acreditación y Acceso', e: 'E1', q: 'Recibe la habilitación vigente de cada persona y devuelve los ingresos y rechazos.', lat: 45 },
+  { id: 'SYS-10', n: 'Planillas y carpetas', t: 'Se reemplaza', dir: '—', loc: '—', mod: 'Todos', e: 'E1 y E2', q: 'Dejan de ser el sistema de registro; su historia se migra y quedan como consulta.', lat: 0 }
+];
 
 /* ---------- Generadores base ---------- */
 const R = rng(2026);
