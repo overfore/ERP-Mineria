@@ -89,6 +89,32 @@ La carpeta [`antecedentes/`](antecedentes) reúne los documentos de los que sale
 | [`antecedentes/correo/`](antecedentes/correo) | `Informe3_Aclaraciones_TFEP-01-2026.md`: el comunicado de aclaraciones del Informe 3 | Una parte explica qué es el prototipo y qué se pide en esta entrega (un avance navegable) |
 | [`antecedentes/documentos/`](antecedentes/documentos) | Subdocumento 3 y sus anexos, Subdocumento 4 y sus anexos, y los Formularios T-11 y T-12 (PDF) | Describen la solución y la arquitectura que el prototipo muestra |
 | [`antecedentes/bases md/`](antecedentes/bases%20md) | `bases-administrativas.md`, `bases-tecnicas-caso-mineria.md` y `bases-tecnicas-transversales.md` | Las tres bases de la licitación: lo que se necesita y cómo debe ser el prototipo |
+| [`antecedentes/imagenes/`](antecedentes/imagenes) | `modulos-del-sistema.png`: la foto de los módulos del sistema | Vista general de la solución, de un vistazo |
+
+### Módulos del sistema
+
+![Nueve módulos en dos etapas, sobre lo que la compañía ya tiene](antecedentes/imagenes/modulos-del-sistema.png)
+
+Fuente: Subdocumento 3 (módulos por etapa y sistemas existentes).
+
+La solución tiene **nueve módulos en dos etapas**: la Etapa 1 (E1) entra en producción en el mes 16 y la Etapa 2 (E2), en el mes 21. Los módulos marcados con **NODO** también corren en la faena y siguen funcionando 48 h sin enlace.
+
+| Grupo | Módulos |
+|---|---|
+| Problema 1 · Trazabilidad comercial | Operación Mina (E1, NODO) → Trazabilidad y Embarque (E1, E2, NODO) → Conciliación Metalúrgica (E1, NODO) |
+| Problema 2 · Productividad operacional | Equipos y Mantenimiento (E2) |
+| Problema 3 · Cumplimiento regulatorio y personas | Acreditación y Acceso (E1, E2, NODO), Seguridad y Salud Ocupacional (E2, NODO), Cumplimiento Ambiental (E2) |
+| Transversales | Indicadores y Centro Integrado (E1, E2), Administración y Servicios Comunes (E1) |
+| Integración | Integrador de Sistemas (E1, NODO): un conector por cada sistema existente |
+
+Acreditación y Acceso entrega la habilitación a Operación Mina. Operación Mina pasa los datos del viaje a Trazabilidad y Embarque, y esta pasa los datos del lote a Conciliación Metalúrgica.
+
+Qué se hace con los sistemas que la compañía ya tiene:
+
+- **Se integran:** SAP S/4HANA, despacho de flota, laboratorio, telemetría de fabricantes y control de fatiga.
+- **Solo lectura:** historiador de proceso, planificación minera y báscula de camiones.
+- **Se amplía:** acceso de portería.
+- **Se reemplazan:** planillas y carpetas.
 
 ## Supuestos y límites
 
@@ -112,7 +138,7 @@ js/data.js          Datos de demostración, perfiles y menú
 js/sim.js           Simulación de conectividad (equipo → Nodo de Faena → nube)
 js/app.js           Enrutador, estructura general y recorrido guiado
 js/views-*.js       Pantallas por área (públicas, operación, personas, administración, documentación, centro de control)
-antecedentes/       Documentos de referencia: correo, documentos de la solución y bases
+antecedentes/       Documentos de referencia: correo, documentos de la solución, bases e imágenes
 ```
 
 ## Accesibilidad
