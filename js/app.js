@@ -20,7 +20,7 @@ H.allowed = (id) => !H.S.user || H.ROLES[H.S.user.role].items.includes(id);
 /* ---------- Rastro de navegación ---------- */
 const crumbs = (list) => `<nav class="crumbs" aria-label="Rastro de navegación"><ol>${list.map((c, i) => i < list.length - 1 ? `<li><a href="${c[1]}">${esc(c[0])}</a></li>` : `<li aria-current="page">${esc(c[0])}</li>`).join('')}</ol></nav>`;
 H.crumbs = crumbs;
-H.pageH = (t, sub, right = '') => `<div class="page-h"><div><h1 id="pgh" tabindex="-1">${t}</h1>${sub ? `<p>${sub}</p>` : ''}</div><div class="row">${right}</div></div>`;
+H.pageH = (t, sub, right = '') => `<div class="page-h"><div><h1 id="pgh" tabindex="-1">${t}</h1>${H.modChips ? H.modChips(H.curItem) : ''}${sub ? `<p>${sub}</p>` : ''}</div><div class="row">${right}</div></div>`;
 
 /* ---------- Layout ---------- */
 function connChip() {
@@ -107,6 +107,7 @@ async function render() {
   if (match.skeleton !== false) main.innerHTML = H.skel(2);
   await new Promise(r => setTimeout(r, match.fast ? 40 : 260));
   if (myTok !== tok) return;
+  H.curItem = auth ? match.item : null;
   main.innerHTML = (match.crumbs && auth ? crumbs(match.crumbs(params)) : '') + match.render(params);
   match.mount && match.mount(main, params);
   window.scrollTo(0, 0);

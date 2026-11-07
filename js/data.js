@@ -38,6 +38,23 @@ H.NAV = [
     { id: 'ayuda', l: 'Ayuda y accesibilidad', h: '#/ayuda', i: 'help' }] }
 ];
 
+/* ---------- Módulos de la solución (Subdocumento 3: nueve módulos en dos etapas, más el Integrador) ----------
+   e: etapas en que entra a producción (E1: mes 16 · E2: mes 21). nodo: también corre en el Nodo de Faena (48 h sin enlace).
+   items: pantallas del prototipo que muestran el módulo. */
+H.MODULOS = [
+  { id: 'opmina', n: 'Operación Mina', g: 'Problema 1 · Trazabilidad comercial', d: 'Plan, declaración y perforación', e: ['E1'], nodo: true, items: ['plan', 'perforacion', 'terreno'] },
+  { id: 'traz', n: 'Trazabilidad y Embarque', g: 'Problema 1 · Trazabilidad comercial', d: 'Stock, recepción y embarque', e: ['E1', 'E2'], nodo: true, items: ['trazabilidad'] },
+  { id: 'conc', n: 'Conciliación Metalúrgica', g: 'Problema 1 · Trazabilidad comercial', d: 'Pesaje y balance', e: ['E1'], nodo: true, items: ['conciliacion'] },
+  { id: 'equ', n: 'Equipos y Mantenimiento', g: 'Problema 2 · Productividad operacional', d: 'Avisos de falla, alarmas y mantención', e: ['E2'], nodo: false, items: ['equipos'] },
+  { id: 'acr', n: 'Acreditación y Acceso', g: 'Problema 3 · Cumplimiento regulatorio y personas', d: 'Habilitación, credencial y portería', e: ['E1', 'E2'], nodo: true, items: ['acreditacion', 'porteria'] },
+  { id: 'sso', n: 'Seguridad y Salud Ocupacional', g: 'Problema 3 · Cumplimiento regulatorio y personas', d: 'Incidentes e inspecciones', e: ['E2'], nodo: true, items: ['seguridad'] },
+  { id: 'amb', n: 'Cumplimiento Ambiental', g: 'Problema 3 · Cumplimiento regulatorio y personas', d: 'Mediciones e informes', e: ['E2'], nodo: false, items: ['ambiental'] },
+  { id: 'ind', n: 'Indicadores y Centro Integrado', g: 'Transversales', d: 'Tableros de turno y vista del CIO', e: ['E1', 'E2'], nodo: false, items: ['control', 'tablero'] },
+  { id: 'adm', n: 'Administración y Servicios Comunes', g: 'Transversales', d: 'Identidad, auditoría, firma y flujos', e: ['E1'], nodo: false, items: ['admin'] },
+  { id: 'int', n: 'Integrador de Sistemas', g: 'Integración', d: 'Un conector por cada sistema existente', e: ['E1'], nodo: true, items: ['integrador'] }
+];
+H.modOf = item => H.MODULOS.find(m => m.items.includes(item));
+
 /* ---------- Generadores base ---------- */
 const R = rng(2026);
 const pick = (a, r = R) => a[Math.floor(r() * a.length)];
