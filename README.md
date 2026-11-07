@@ -37,7 +37,7 @@ Una aplicación web de una sola página (HTML, CSS y JavaScript puros, sin depen
 - **Acreditación de personas**, seguridad y fatiga, ambiental y huella de carbono, y gestión de terceros.
 - **Consola de portería** (Acreditación y Acceso): lo que ve el guardia al leer una credencial. Muestra si la persona puede ingresar y, si tiene un documento vencido, los tres avisos previos que envió el sistema (criterio de aceptación 7). Funciona sin enlace y deja bitácora de ingresos y rechazos.
 - **Integrador de sistemas**: los diez sistemas existentes con su tratamiento (se integra, solo lectura, se amplía o se reemplaza), qué intercambia cada conector, dónde corre y su estado. Reacciona al simulador de corte: los conectores que van a la nube pasan a "En bandeja de salida".
-- **Módulo, etapa y NODO en cada pantalla**: bajo el título se indica a qué módulo de la solución pertenece y sus marcas E1, E2 y NODO, como en la imagen de módulos. La arquitectura de información tiene una pestaña "Módulos de la solución" con el cruce completo.
+- **Módulo y NODO en cada pantalla**: bajo el título se indica a qué módulo de la solución pertenece y, si corre en la faena, la marca NODO, como en la imagen de módulos. La arquitectura de información tiene una pestaña "Módulos de la solución" con el cruce completo.
 - **Tablero analítico** con filtros, exportación simulada y desglose por indicador.
 - **Terreno**: dos vistas.
   - **Operador de pala: la Botonera de Pala**, como la Figura 3.10 del Subdocumento 3. Cuatro botones de destino (planta, baja ley, estéril y borde), una luz que marca el destino del plan y el toque de credencial al inicio del turno. No hay pantalla, formularios ni PIN. Los registros se guardan sin señal y se envían al volver el enlace.
@@ -100,17 +100,17 @@ La carpeta [`antecedentes/`](antecedentes) reúne los documentos de los que sale
 
 ![Nueve módulos en dos etapas, sobre lo que la compañía ya tiene](antecedentes/imagenes/modulos-del-sistema.png)
 
-Fuente: Subdocumento 3 (módulos por etapa y sistemas existentes).
+Fuente: Subdocumento 3 (módulos y sistemas existentes).
 
-La solución tiene **nueve módulos en dos etapas**: la Etapa 1 (E1) entra en producción en el mes 16 y la Etapa 2 (E2), en el mes 21. Los módulos marcados con **NODO** también corren en la faena y siguen funcionando 48 h sin enlace.
+La solución tiene **nueve módulos**. Los marcados con **NODO** también corren en la faena y siguen funcionando 48 h sin enlace.
 
 | Grupo | Módulos |
 |---|---|
-| Problema 1 · Trazabilidad comercial | Operación Mina (E1, NODO) → Trazabilidad y Embarque (E1, E2, NODO) → Conciliación Metalúrgica (E1, NODO) |
-| Problema 2 · Productividad operacional | Equipos y Mantenimiento (E2) |
-| Problema 3 · Cumplimiento regulatorio y personas | Acreditación y Acceso (E1, E2, NODO), Seguridad y Salud Ocupacional (E2, NODO), Cumplimiento Ambiental (E2) |
-| Transversales | Indicadores y Centro Integrado (E1, E2), Administración y Servicios Comunes (E1) |
-| Integración | Integrador de Sistemas (E1, NODO): un conector por cada sistema existente |
+| Problema 1 · Trazabilidad comercial | Operación Mina (NODO) → Trazabilidad y Embarque (NODO) → Conciliación Metalúrgica (NODO) |
+| Problema 2 · Productividad operacional | Equipos y Mantenimiento |
+| Problema 3 · Cumplimiento regulatorio y personas | Acreditación y Acceso (NODO), Seguridad y Salud Ocupacional (NODO), Cumplimiento Ambiental |
+| Transversales | Indicadores y Centro Integrado, Administración y Servicios Comunes |
+| Integración | Integrador de Sistemas (NODO): un conector por cada sistema existente |
 
 Acreditación y Acceso entrega la habilitación a Operación Mina. Operación Mina pasa los datos del viaje a Trazabilidad y Embarque, y esta pasa los datos del lote a Conciliación Metalúrgica.
 
@@ -131,7 +131,6 @@ Qué se hace con los sistemas que la compañía ya tiene:
 - Las exportaciones a PDF y XLSX son simuladas; el CSV descarga datos solo en las pantallas que lo entregan.
 - Los mapas, el modelo 3D y la imagen del login son **ilustraciones esquemáticas generadas por código**, no datos reales ni fotos de una mina.
 - No cubre toda la propuesta: es un avance. No incluye el Portal para Compradores, que el numeral 25.2 no exige. El pipeline DevSecOps se documenta en la propuesta, no está en el prototipo.
-- La **etapa de cada conector** del Integrador se asignó según el módulo que lo usa (por ejemplo, telemetría en E2 porque la usa Equipos y Mantenimiento). El Subdocumento 3 marca al Integrador completo como E1.
 
 ## Estructura
 
@@ -144,7 +143,7 @@ js/data.js          Datos de demostración, perfiles y menú
 js/sim.js           Simulación de conectividad (equipo → Nodo de Faena → nube)
 js/app.js           Enrutador, estructura general y recorrido guiado
 js/views-*.js       Pantallas por área (públicas, operación, personas, administración, documentación, centro de control)
-js/views-modulos.js Integrador de sistemas, perforación, consola de portería y marcas de módulo y etapa
+js/views-modulos.js Integrador de sistemas, perforación, consola de portería y marca de módulo
 antecedentes/       Documentos de referencia: correo, documentos de la solución, bases e imágenes
 ```
 
@@ -188,6 +187,6 @@ Hechos el 5 y 6 de noviembre de 2026 en este código.
 Hechos el 7 de noviembre de 2026, tras revisar el prototipo contra los módulos de la solución y el capítulo 25:
 
 - **Integrador de sistemas**, **Perforación y pozos** y **Consola de portería**, descritos en [Qué hicimos](#qué-hicimos).
-- **Marcas de módulo, E1, E2 y NODO** bajo el título de cada pantalla, y pestaña "Módulos de la solución" en la arquitectura de información.
+- **Marca de módulo y NODO** bajo el título de cada pantalla, y pestaña "Módulos de la solución" en la arquitectura de información.
 - **Responsivo (RT-25.04):** la cabecera cabe en 375 px, el contenido ya no ensancha la página en pantallas angostas, las tablas con texto oculto para lector de pantalla ya no desbordan y la vista de terreno vuelve a dos columnas en escritorio.
 - **Ayuda:** la pregunta sobre portería dice ahora 30, 15 y 7 días, igual que los parámetros.

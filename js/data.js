@@ -41,36 +41,36 @@ H.NAV = [
     { id: 'ayuda', l: 'Ayuda y accesibilidad', h: '#/ayuda', i: 'help' }] }
 ];
 
-/* ---------- Módulos de la solución (Subdocumento 3: nueve módulos en dos etapas, más el Integrador) ----------
-   e: etapas en que entra a producción (E1: mes 16 · E2: mes 21). nodo: también corre en el Nodo de Faena (48 h sin enlace).
+/* ---------- Módulos de la solución (Subdocumento 3: nueve módulos, más el Integrador) ----------
+   nodo: también corre en el Nodo de Faena (48 h sin enlace).
    items: pantallas del prototipo que muestran el módulo. */
 H.MODULOS = [
-  { id: 'opmina', n: 'Operación Mina', g: 'Problema 1 · Trazabilidad comercial', d: 'Plan, declaración y perforación', e: ['E1'], nodo: true, items: ['plan', 'perforacion', 'terreno'] },
-  { id: 'traz', n: 'Trazabilidad y Embarque', g: 'Problema 1 · Trazabilidad comercial', d: 'Stock, recepción y embarque', e: ['E1', 'E2'], nodo: true, items: ['trazabilidad'] },
-  { id: 'conc', n: 'Conciliación Metalúrgica', g: 'Problema 1 · Trazabilidad comercial', d: 'Pesaje y balance', e: ['E1'], nodo: true, items: ['conciliacion'] },
-  { id: 'equ', n: 'Equipos y Mantenimiento', g: 'Problema 2 · Productividad operacional', d: 'Avisos de falla, alarmas y mantención', e: ['E2'], nodo: false, items: ['equipos'] },
-  { id: 'acr', n: 'Acreditación y Acceso', g: 'Problema 3 · Cumplimiento regulatorio y personas', d: 'Habilitación, credencial y portería', e: ['E1', 'E2'], nodo: true, items: ['acreditacion', 'porteria'] },
-  { id: 'sso', n: 'Seguridad y Salud Ocupacional', g: 'Problema 3 · Cumplimiento regulatorio y personas', d: 'Incidentes e inspecciones', e: ['E2'], nodo: true, items: ['seguridad'] },
-  { id: 'amb', n: 'Cumplimiento Ambiental', g: 'Problema 3 · Cumplimiento regulatorio y personas', d: 'Mediciones e informes', e: ['E2'], nodo: false, items: ['ambiental'] },
-  { id: 'ind', n: 'Indicadores y Centro Integrado', g: 'Transversales', d: 'Tableros de turno y vista del CIO', e: ['E1', 'E2'], nodo: false, items: ['control', 'tablero'] },
-  { id: 'adm', n: 'Administración y Servicios Comunes', g: 'Transversales', d: 'Identidad, auditoría, firma y flujos', e: ['E1'], nodo: false, items: ['admin'] },
-  { id: 'int', n: 'Integrador de Sistemas', g: 'Integración', d: 'Un conector por cada sistema existente', e: ['E1'], nodo: true, items: ['integrador'] }
+  { id: 'opmina', n: 'Operación Mina', g: 'Problema 1 · Trazabilidad comercial', d: 'Plan, declaración y perforación', nodo: true, items: ['plan', 'perforacion', 'terreno'] },
+  { id: 'traz', n: 'Trazabilidad y Embarque', g: 'Problema 1 · Trazabilidad comercial', d: 'Stock, recepción y embarque', nodo: true, items: ['trazabilidad'] },
+  { id: 'conc', n: 'Conciliación Metalúrgica', g: 'Problema 1 · Trazabilidad comercial', d: 'Pesaje y balance', nodo: true, items: ['conciliacion'] },
+  { id: 'equ', n: 'Equipos y Mantenimiento', g: 'Problema 2 · Productividad operacional', d: 'Avisos de falla, alarmas y mantención', nodo: false, items: ['equipos'] },
+  { id: 'acr', n: 'Acreditación y Acceso', g: 'Problema 3 · Cumplimiento regulatorio y personas', d: 'Habilitación, credencial y portería', nodo: true, items: ['acreditacion', 'porteria'] },
+  { id: 'sso', n: 'Seguridad y Salud Ocupacional', g: 'Problema 3 · Cumplimiento regulatorio y personas', d: 'Incidentes e inspecciones', nodo: true, items: ['seguridad'] },
+  { id: 'amb', n: 'Cumplimiento Ambiental', g: 'Problema 3 · Cumplimiento regulatorio y personas', d: 'Mediciones e informes', nodo: false, items: ['ambiental'] },
+  { id: 'ind', n: 'Indicadores y Centro Integrado', g: 'Transversales', d: 'Tableros de turno y vista del CIO', nodo: false, items: ['control', 'tablero'] },
+  { id: 'adm', n: 'Administración y Servicios Comunes', g: 'Transversales', d: 'Identidad, auditoría, firma y flujos', nodo: false, items: ['admin'] },
+  { id: 'int', n: 'Integrador de Sistemas', g: 'Integración', d: 'Un conector por cada sistema existente', nodo: true, items: ['integrador'] }
 ];
 H.modOf = item => H.MODULOS.find(m => m.items.includes(item));
 
 /* ---------- Sistemas existentes y su conector (Subdocumento 3, 3.3.2.2) ----------
    t: tratamiento · dir: sentido del dato · loc: 'faena' (el conector corre en el Nodo) o 'nube' · mod: módulo que lo usa. */
 H.SISTEMAS = [
-  { id: 'SYS-01', n: 'SAP S/4HANA', t: 'Se integra', dir: 'Ida y vuelta', loc: 'nube', mod: 'Administración, Equipos, Trazabilidad', e: 'E1', q: 'Avisos de falla, pautas, guías de despacho y cierre de conciliación. SAP sigue siendo el sistema de registro y emite los documentos.', lat: 420 },
-  { id: 'SYS-02', n: 'Despacho de flota', t: 'Se integra', dir: 'Ida y vuelta', loc: 'faena', mod: 'Operación Mina', e: 'E1', q: 'Viajes, cargas y destino de cada camión; recibe la versión vigente del plan.', lat: 35 },
-  { id: 'SYS-03', n: 'Laboratorio', t: 'Se integra', dir: 'Ida y vuelta', loc: 'faena', mod: 'Trazabilidad y Embarque', e: 'E1', q: 'Muestras y resultados de ley y arsénico, sin transcripción.', lat: 60 },
-  { id: 'SYS-04', n: 'Telemetría de fabricantes (3 portales)', t: 'Se integra', dir: 'Entrada', loc: 'nube', mod: 'Equipos y Mantenimiento', e: 'E2', q: 'Alarmas, horas, consumos y códigos de falla de camiones, palas y perforadoras.', lat: 640 },
-  { id: 'SYS-05', n: 'Control de fatiga', t: 'Se integra', dir: 'Entrada', loc: 'faena', mod: 'Seguridad y Salud Ocupacional', e: 'E2', q: 'Alertas de somnolencia y distracción, para documentar la acción.', lat: 40 },
-  { id: 'SYS-06', n: 'Historiador de proceso', t: 'Solo lectura', dir: 'Entrada', loc: 'faena', mod: 'Conciliación Metalúrgica', e: 'E1', q: 'Balanza de alimentación y variables de planta, por diodo de datos desde la red de control.', lat: 55 },
-  { id: 'SYS-07', n: 'Planificación minera', t: 'Solo lectura', dir: 'Entrada', loc: 'nube', mod: 'Operación Mina', e: 'E1', q: 'Plan semanal y polígonos con ley estimada.', lat: 380 },
-  { id: 'SYS-08', n: 'Báscula de camiones', t: 'Solo lectura', dir: 'Entrada', loc: 'faena', mod: 'Conciliación Metalúrgica', e: 'E1', q: 'Pesaje de control y de despacho a puerto.', lat: 30 },
-  { id: 'SYS-09', n: 'Acceso de portería', t: 'Se amplía', dir: 'Ida y vuelta', loc: 'faena', mod: 'Acreditación y Acceso', e: 'E1', q: 'Recibe la habilitación vigente de cada persona y devuelve los ingresos y rechazos.', lat: 45 },
-  { id: 'SYS-10', n: 'Planillas y carpetas', t: 'Se reemplaza', dir: '—', loc: '—', mod: 'Todos', e: 'E1 y E2', q: 'Dejan de ser el sistema de registro; su historia se migra y quedan como consulta.', lat: 0 }
+  { id: 'SYS-01', n: 'SAP S/4HANA', t: 'Se integra', dir: 'Ida y vuelta', loc: 'nube', mod: 'Administración, Equipos, Trazabilidad', q: 'Avisos de falla, pautas, guías de despacho y cierre de conciliación. SAP sigue siendo el sistema de registro y emite los documentos.', lat: 420 },
+  { id: 'SYS-02', n: 'Despacho de flota', t: 'Se integra', dir: 'Ida y vuelta', loc: 'faena', mod: 'Operación Mina', q: 'Viajes, cargas y destino de cada camión; recibe la versión vigente del plan.', lat: 35 },
+  { id: 'SYS-03', n: 'Laboratorio', t: 'Se integra', dir: 'Ida y vuelta', loc: 'faena', mod: 'Trazabilidad y Embarque', q: 'Muestras y resultados de ley y arsénico, sin transcripción.', lat: 60 },
+  { id: 'SYS-04', n: 'Telemetría de fabricantes (3 portales)', t: 'Se integra', dir: 'Entrada', loc: 'nube', mod: 'Equipos y Mantenimiento', q: 'Alarmas, horas, consumos y códigos de falla de camiones, palas y perforadoras.', lat: 640 },
+  { id: 'SYS-05', n: 'Control de fatiga', t: 'Se integra', dir: 'Entrada', loc: 'faena', mod: 'Seguridad y Salud Ocupacional', q: 'Alertas de somnolencia y distracción, para documentar la acción.', lat: 40 },
+  { id: 'SYS-06', n: 'Historiador de proceso', t: 'Solo lectura', dir: 'Entrada', loc: 'faena', mod: 'Conciliación Metalúrgica', q: 'Balanza de alimentación y variables de planta, por diodo de datos desde la red de control.', lat: 55 },
+  { id: 'SYS-07', n: 'Planificación minera', t: 'Solo lectura', dir: 'Entrada', loc: 'nube', mod: 'Operación Mina', q: 'Plan semanal y polígonos con ley estimada.', lat: 380 },
+  { id: 'SYS-08', n: 'Báscula de camiones', t: 'Solo lectura', dir: 'Entrada', loc: 'faena', mod: 'Conciliación Metalúrgica', q: 'Pesaje de control y de despacho a puerto.', lat: 30 },
+  { id: 'SYS-09', n: 'Acceso de portería', t: 'Se amplía', dir: 'Ida y vuelta', loc: 'faena', mod: 'Acreditación y Acceso', q: 'Recibe la habilitación vigente de cada persona y devuelve los ingresos y rechazos.', lat: 45 },
+  { id: 'SYS-10', n: 'Planillas y carpetas', t: 'Se reemplaza', dir: '—', loc: '—', mod: 'Todos', q: 'Dejan de ser el sistema de registro; su historia se migra y quedan como consulta.', lat: 0 }
 ];
 
 /* ---------- Perforación: pozos del turno (RF-TER-006) ---------- */
