@@ -5,7 +5,7 @@ Prototipo navegable para la propuesta de la Compañía Minera Altos de Aranda S.
 
 > Es una **simulación**: no hay servidor, base de datos ni nube reales. Todo corre en el navegador con datos de demostración, para mostrar cómo se vería y cómo se comportaría la plataforma.
 
-> **Estado (5 de noviembre de 2026).** Este repositorio es la versión de referencia del prototipo. Se migrará a Angular. Los cambios de contenido acordados ese día (botonera, nombre SITCO Aranda, límite de arsénico y ayudas emergentes) ya están en este código. Los de estilos y comportamiento siguen pendientes y se detallan en [Cambios acordados pendientes](#cambios-acordados-pendientes). El 7 de noviembre se agregaron las piezas que faltaban para calzar con los módulos de la solución y se corrigió el diseño responsivo.
+> **Estado (7 de noviembre de 2026).** La raíz del repositorio es la versión de referencia del prototipo, en HTML. La versión en Angular está en [`sitco-angular/`](sitco-angular). Los cambios de contenido acordados el 5 de noviembre (botonera, nombre SITCO Aranda, límite de arsénico y ayudas emergentes) están en las dos versiones; los de estilos y comportamiento, solo en la de Angular (ver [Cambios acordados pendientes](#cambios-acordados-pendientes)). El 7 de noviembre se agregaron las piezas que faltaban para calzar con los módulos de la solución, se corrigió el diseño responsivo y se hizo la versión en Angular.
 
 ---
 
@@ -22,6 +22,18 @@ Prototipo navegable para la propuesta de la Compañía Minera Altos de Aranda S.
 | Código de recuperación de cuenta | `482913` |
 
 Aún no está publicado. Si se habilita GitHub Pages desde la rama `prototipo`, la dirección sería `https://overfore.github.io/ERP-Mineria/`.
+
+### Versión en Angular
+
+La carpeta [`sitco-angular/`](sitco-angular) tiene el mismo prototipo hecho en **Angular 22** con estilos en **Tailwind CSS 4**: las mismas 37 pantallas, organizadas en páginas y componentes reutilizables. Para verla:
+
+```bash
+cd sitco-angular
+npm install
+npm start
+```
+
+y abre `http://localhost:4200`. Su estructura y sus diferencias se explican en [`sitco-angular/README.md`](sitco-angular/README.md).
 
 ---
 
@@ -144,6 +156,7 @@ js/sim.js           Simulación de conectividad (equipo → Nodo de Faena → nu
 js/app.js           Enrutador, estructura general y recorrido guiado
 js/views-*.js       Pantallas por área (públicas, operación, personas, administración, documentación, centro de control)
 js/views-modulos.js Integrador de sistemas, perforación, consola de portería y marca de módulo
+sitco-angular/      El mismo prototipo en Angular 22 con Tailwind CSS 4 (páginas y componentes)
 antecedentes/       Documentos de referencia: correo, documentos de la solución, bases e imágenes
 ```
 
@@ -161,10 +174,10 @@ No está comprobado: el uso con un lector de pantalla real, el modo de alto cont
 
 ## Cambios acordados pendientes
 
-Acordados el 5 de noviembre de 2026. Se harán en la versión Angular.
+Acordados el 5 de noviembre de 2026 para la versión Angular. Ya están hechos en [`sitco-angular/`](sitco-angular); en esta versión en HTML siguen pendientes.
 
 1. **Objetivos táctiles de 44 × 44 px** en todos los controles, incluidos los encabezados de columna de las tablas, las casillas de fila, las fichas de camión del mapa y el cierre de notificaciones.
-2. **Pausa del movimiento** del mapa de despacho (WCAG 2.2.2, nivel A): hoy los camiones se mueven solos y no hay forma de detenerlos. Debe haber un interruptor "Pausar movimiento", y el mapa debe partir pausado si el sistema pide reducir animaciones.
+2. **Pausa del movimiento** del mapa de despacho (WCAG 2.2.2, nivel A): un botón "Pausar movimiento", y el mapa parte pausado si el sistema pide reducir animaciones.
 
 ## Cambios acordados ya implementados
 
