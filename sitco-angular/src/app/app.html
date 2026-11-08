@@ -1,0 +1,50 @@
+<a href="" (click)="saltar($event)" class="absolute left-2 -top-15 focus:top-2 z-999 bg-white text-pizarra px-4 py-3 rounded-lg font-semibold">Saltar al contenido principal</a>
+
+<app-header [auth]="auth()" />
+
+@if (auth()) {
+  @if (sim.link === 'down') {
+    <div class="flex gap-2.5 items-center flex-wrap px-4 py-2 bg-aviso-l border-b-2 border-[#E0A93B] text-[#4a2f00] text-sm" role="status">
+      <app-icon name="wifiOff" /><strong>Sin camino a la nube.</strong>
+      <span>La operación continúa en modo local desde el Nodo de Faena · {{ nd(sim.hours, 0) }} h de 48 h de autonomía · {{ nf(sim.pending()) }} registros por sincronizar.</span>
+      <a routerLink="/conectividad" class="link-btn">Ver detalle</a>
+    </div>
+  }
+  <div class="grid grid-cols-[minmax(0,1fr)] lg:grid-cols-[256px_minmax(0,1fr)] min-h-[calc(100vh-60px)]">
+    <app-sidebar />
+    <main id="main" tabindex="-1" class="w-full max-w-[1360px] mx-auto px-4 lg:px-6 pt-4 lg:pt-6 pb-24 min-w-0">
+      @if (page.migas().length) {
+        <nav class="text-sm text-acero mb-3" aria-label="Rastro de navegación">
+          <ol class="flex flex-wrap gap-1.5 list-none p-0 m-0">
+            @for (m of page.migas(); track $index; let ultimo = $last) {
+              @if (!$first) { <li aria-hidden="true">›</li> }
+              @if (ultimo) { <li aria-current="page">{{ m[0] }}</li> } @else { <li><a [routerLink]="m[1]">{{ m[0] }}</a></li> }
+            }
+          </ol>
+        </nav>
+      }
+      @if (restringido()) {
+        <div class="card">
+          <app-empty titulo="Acceso restringido para tu perfil"
+            [mensaje]="'El perfil <strong>' + ses.rol()?.label + '</strong> no tiene permiso para esta sección. Así funciona el control de acceso por roles.'">
+            <div class="flex gap-3 justify-center flex-wrap">
+              <button type="button" class="btn" (click)="ses.cambiarPerfil.set(true)">Cambiar de perfil (demostración)</button>
+              <a class="btn btn-sec" routerLink="/inicio">Volver al inicio</a>
+            </div>
+          </app-empty>
+        </div>
+      } @else {
+        @if (page.cargando()) { <app-skeleton /> }
+        <div [class.hidden]="page.cargando()"><router-outlet /></div>
+      }
+    </main>
+  </div>
+  <app-quick-menu />
+} @else {
+  <main id="main" tabindex="-1"><router-outlet /></main>
+}
+
+<app-sim-widget />
+<app-toasts />
+<app-tour />
+<app-role-picker />

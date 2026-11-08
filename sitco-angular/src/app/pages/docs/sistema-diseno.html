@@ -1,0 +1,94 @@
+<div [class]="ses.user() ? '' : 'px-4 py-8 md:px-6 md:py-12'"><div [class]="ses.user() ? '' : 'max-w-[1180px] mx-auto'">
+  <app-page-header titulo="Sistema de diseño" sub="RT-25.05: paleta de cinco colores, dos familias tipográficas, iconografía, retícula y componentes reutilizables. Pensado para guantes, sol de mediodía y operación continua." />
+  <app-tabs [items]="tabs" [(activa)]="tab" />
+
+  @switch (tab()) {
+    @case ('c') {
+      <h3>Paleta principal (5 colores)</h3>
+      <div class="grid gap-4 grid-cols-[repeat(auto-fit,minmax(150px,1fr))]">
+        @for (x of paleta; track x[0]) {
+          <div>
+            <div class="h-19 rounded-[10px] flex items-end p-2 text-xs font-semibold border border-black/12" [style.background]="x[1]" [style.color]="x[2]">{{ x[1] }}</div>
+            <strong class="text-sm">{{ x[0] }}</strong>
+            <div class="text-[13px] muted">{{ x[3] }}</div>
+            <code class="text-[12px] muted">bg-{{ x[4] }} · text-{{ x[4] }}</code>
+          </div>
+        }
+      </div>
+      <h3 class="mt-6">Estados funcionales (derivados)</h3>
+      <div class="grid gap-4 grid-cols-[repeat(auto-fit,minmax(150px,1fr))]">
+        @for (x of estados; track x[0]) {
+          <div><div class="h-19 rounded-[10px] flex items-end p-2 text-xs font-semibold border border-black/12" [style.background]="x[2]" [style.color]="x[1]">{{ x[1] }}</div><strong class="text-sm">{{ x[0] }}</strong></div>
+        }
+      </div>
+      <h3 class="mt-6">Contrastes verificados (WCAG 2.2 AA)</h3>
+      <div class="overflow-x-auto border border-arena-2 rounded-xl bg-white">
+        <table class="stack">
+          <thead><tr><th>Combinación</th><th>Contraste</th><th>Uso</th></tr></thead>
+          <tbody>@for (r of contrastes; track r[0]) { <tr><td data-l="Combinación">{{ r[0] }}</td><td data-l="Contraste"><strong>{{ r[1] }}</strong></td><td data-l="Uso">{{ r[2] }}</td></tr> }</tbody>
+        </table>
+      </div>
+    }
+    @case ('t') {
+      <div class="grid gap-4 md:grid-cols-2">
+        <div class="card-flat"><h3>Títulos · Barlow Semi Condensed</h3>
+          <div class="font-titulo font-bold text-[38px]">Cada tonelada deja huella</div>
+          <div class="font-titulo font-bold text-2xl">Subtítulo de sección</div>
+          <div class="font-titulo font-semibold text-[19px]">Título de tarjeta</div></div>
+        <div class="card-flat"><h3>Texto · IBM Plex Sans</h3>
+          <p class="text-base">Cuerpo 16 px: pensado para lectura continua y para leerse con luz solar fuerte.</p>
+          <p class="text-sm">Texto pequeño 14 px para ayudas y metadatos.</p>
+          <p class="text-[13px]">Mínimo 13 px para notas.</p></div>
+      </div>
+      <h3 class="mt-6">Retícula y espaciado (base 8 px)</h3>
+      <div class="flex flex-wrap items-end gap-3">
+        @for (n of espacios; track n) { <div class="text-center"><div class="bg-cobre mx-auto" [style.width.px]="n" [style.height.px]="n"></div><span class="text-[13px]">{{ n }}</span></div> }
+      </div>
+      <p class="text-sm muted mt-2">Puntos de quiebre de Tailwind: <code>md</code> 768 px (dos columnas), <code>lg</code> 1024 px (el menú lateral deja de ser cajón) y <code>xl</code> 1280 px (tres y cuatro columnas). Se verifica en 1920×1080, 1366×768, 768×1024 vertical y horizontal, y 375×812.</p>
+    }
+    @case ('k') {
+      <div class="grid gap-4 md:grid-cols-2">
+        <div class="card-flat"><h3>Botones</h3>
+          <div class="flex flex-wrap gap-3"><button type="button" class="btn">Primario</button><button type="button" class="btn btn-sec">Secundario</button><button type="button" class="btn btn-ter">Terciario</button><button type="button" class="btn btn-danger">Crítico</button></div></div>
+        <div class="card-flat"><h3>Insignias y estados</h3>
+          <div class="flex flex-wrap gap-3">@for (s of ['Habilitado', 'Por vencer', 'Vencido', 'En revisión', 'Programado']; track s) { <app-estado [v]="s" /> }</div></div>
+        <div class="card-flat"><h3>Retroalimentación</h3>
+          <div class="flex flex-wrap gap-3">
+            @for (a of avisos; track a[0]) { <button type="button" class="btn btn-sm btn-sec" (click)="aviso(a[0], a[2])">{{ a[1] }}</button> }
+            <button type="button" class="btn btn-sm btn-sec" (click)="dialogo = true">Diálogo</button>
+          </div></div>
+        <div class="card-flat"><h3>Formulario con validación en tiempo real</h3>
+          <app-field label="RUT" for="dm1" hint="Prueba con uno inválido."><input id="dm1" type="text" appRegla="required|rut" placeholder="12.345.678-5"></app-field></div>
+        <div class="card-flat"><h3>Progreso, carga y vacío</h3>
+          <div class="bar mb-3"><i class="w-[64%]"></i></div>
+          <div class="skel h-5 mb-2"></div>
+          <app-empty titulo="Estado vacío ilustrado" mensaje="Mensaje que explica y propone una acción." /></div>
+        <div class="card-flat"><h3>Navegación por pasos y línea de tiempo</h3>
+          <app-stepper [pasos]="['Uno', 'Dos', 'Tres']" [actual]="1" />
+          <app-timeline [items]="[{ t: 'Hecho', s: 'done', w: 'Ayer' }, { t: 'En curso', s: 'cur', w: 'Ahora' }, { t: 'Pendiente' }]" /></div>
+      </div>
+    }
+    @case ('i') {
+      <div class="grid gap-4 grid-cols-[repeat(auto-fill,minmax(110px,1fr))]">
+        @for (k of iconos; track k) { <div class="card-flat text-center p-3!"><div class="grid place-items-center"><app-icon [name]="k" /></div><div class="text-[13px] mt-2">{{ k }}</div></div> }
+      </div>
+      <p class="text-sm muted mt-2">Íconos de trazo uniforme (1,9 px), siempre acompañados de texto (RT-13.07). En Angular: <code>&lt;app-icon name="truck" /&gt;</code>.</p>
+    }
+    @case ('a') {
+      <ul class="list-disc pl-6">
+        <li>Objetivos táctiles de al menos <strong>44 × 44 px</strong>.</li>
+        <li>Navegación completa por teclado, foco visible de 3 px y orden lógico.</li>
+        <li>Cada campo con etiqueta, ayuda y mensaje de error asociados (<code>aria-describedby</code>).</li>
+        <li>Estados anunciados con regiones <code>aria-live</code> (toasts, validaciones, progreso).</li>
+        <li>Gráficos con descripción textual y tabla de detalle disponible por drill-down.</li>
+        <li>El color nunca es el único indicador: los estados llevan texto o símbolo.</li>
+        <li>Se respeta <code>prefers-reduced-motion</code>.</li>
+      </ul>
+    }
+  }
+</div></div>
+
+<app-modal titulo="Diálogo de confirmación" [(abierto)]="dialogo">
+  <p>Así se confirma una acción crítica: título claro, consecuencia explícita y botones etiquetados con el verbo.</p>
+  <div pie><button type="button" class="btn btn-sec" (click)="dialogo = false">Cancelar</button><button type="button" class="btn btn-danger" (click)="confirmar()">Confirmar</button></div>
+</app-modal>

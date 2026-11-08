@@ -1,0 +1,60 @@
+@if (e(); as e) {
+  @let x = extra()!;
+  <app-page-header [titulo]="e.id + ' · ' + e.tipo" [sub]="e.fab + ' · ' + e.gen + ' · ' + e.zona">
+    <app-estado [v]="e.estado" />
+    @if (e.estado === 'Detenido') { <button type="button" class="btn" (click)="clasificar = true">Clasificar detención</button> }
+    <button type="button" class="btn btn-sec" (click)="crearAviso = true"><app-icon name="wrench" /> Crear aviso en SAP</button>
+  </app-page-header>
+
+  @if (e.det) {
+    <app-banner [tipo]="e.det.causa === 'Sin clasificar' ? 'err' : 'warn'">Detenido hace <strong>{{ desde(e.det.desde) }}</strong> · causa: <strong>{{ e.det.causa }}</strong>.</app-banner>
+  } @else {
+    <app-banner tipo="info">Estado, historial, alarmas de los tres portales de fabricantes y pautas de SAP, reunidos en una sola pantalla.</app-banner>
+  }
+
+  <div class="grid gap-4 md:grid-cols-2">
+    <app-card titulo="Historial reciente (24 h)"><app-timeline [items]="x.historial" /></app-card>
+
+    <app-card titulo="Alarmas de telemetría (3 portales, un solo lugar)">
+      <div class="overflow-x-auto border border-arena-2 rounded-xl bg-white">
+        <table class="stack">
+          <thead><tr><th>Código</th><th>Origen</th><th>Severidad</th><th>Detalle</th><th><span class="sr">Acción</span></th></tr></thead>
+          <tbody>
+            @for (a of x.alarmas; track a[0]; let i = $index) {
+              <tr>
+                <td data-l="Código">{{ a[0] }}</td><td data-l="Origen">{{ a[1] }}</td><td data-l="Severidad"><app-estado [v]="a[2]" /></td><td data-l="Detalle">{{ a[3] }}</td>
+                <td><button type="button" class="btn btn-sm btn-ter" (click)="falsaAlarma()">{{ i === 2 ? 'Ruido' : 'Falsa alarma' }}</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="text-[13px] muted mt-2">Para no repetir el error de 2018, las alertas se agrupan y priorizan: máximo 15 por semana. Marcar una falsa alarma mejora el modelo.</p>
+    </app-card>
+
+    <app-card titulo="Pautas pendientes (SAP)">
+      <ul class="list-none p-0 m-0">
+        @for (o of x.ots; track o[0]) {
+          <li class="flex justify-between items-center gap-3 border-b border-arena-2 py-2">
+            <span><strong>{{ o[0] }}</strong> · {{ o[1] }}<br><span class="text-sm muted">{{ o[2] }}</span></span>
+            <app-estado [v]="o[3] === 'Atrasada' ? 'Vencido' : 'Programado'" />
+          </li>
+        }
+      </ul>
+    </app-card>
+
+    <app-card titulo="Desempeño comparado con la flota"><div [innerHTML]="x.comparado | html"></div></app-card>
+  </div>
+
+  <app-clasificar-detencion [equipo]="clasificar ? e.id : null" (cerrar)="clasificar = false" (listo)="clasificado()" />
+
+  <app-modal titulo="Crear aviso de falla en SAP" [(abierto)]="crearAviso">
+    <p>Se creará un aviso para <strong>{{ e.id }}</strong> con las alarmas de telemetría y el historial adjuntos. SAP es el sistema de registro: la plataforma solo le entrega los datos.</p>
+    <div pie>
+      <button type="button" class="btn btn-sec" (click)="crearAviso = false">Cancelar</button>
+      <button type="button" class="btn" (click)="avisoCreado()">Crear aviso</button>
+    </div>
+  </app-modal>
+} @else {
+  <div class="card"><app-empty titulo="Equipo no encontrado" mensaje="Revisa el código del equipo."><a class="btn" routerLink="/equipos">Volver</a></app-empty></div>
+}

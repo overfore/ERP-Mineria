@@ -1,0 +1,44 @@
+@if (t(); as t) {
+  <app-page-header [titulo]="t.nombre" [sub]="t.tipo + ' · ' + t.rubro + ' · ' + t.rut">
+    <app-estado [v]="t.estado" />
+    <button type="button" class="btn btn-sec" (click)="evaluar = true"><app-icon name="star" /> Evaluar</button>
+  </app-page-header>
+
+  <app-tabs [items]="tabs" [(activa)]="tab" />
+  @switch (tab()) {
+    @case ('f') {
+      <div class="grid gap-4 md:grid-cols-2">
+        <div class="card">
+          <h3>Datos generales</h3>
+          <dl class="text-sm grid grid-cols-[auto_1fr] gap-x-3.5 gap-y-1.5 m-0">
+            <dt class="muted">Razón social</dt><dd class="m-0">{{ t.nombre }}</dd>
+            <dt class="muted">RUT</dt><dd class="m-0">{{ t.rut }}</dd>
+            <dt class="muted">Tipo</dt><dd class="m-0">{{ t.tipo }}</dd>
+            <dt class="muted">Personas acreditadas</dt><dd class="m-0">{{ t.trabajadores ? nf(t.trabajadores) : '—' }}</dd>
+            <dt class="muted">Contacto</dt><dd class="m-0 break-all">{{ contacto() }}</dd>
+          </dl>
+        </div>
+        <div class="card">
+          <h3>Documentos</h3>
+          @for (doc of ['Certificado de vigencia', 'Cumplimiento laboral', 'Póliza de seguro']; track doc) {
+            <div class="flex justify-between items-center border-b border-arena-2 py-2"><span>{{ doc }}</span><app-estado v="Vigente" /></div>
+          }
+        </div>
+      </div>
+    }
+    @case ('e') { <div class="card"><h3>Evaluación: {{ t.score }} / 100</h3><div [innerHTML]="evaluacion() | html"></div></div> }
+    @case ('h') { <div class="card"><app-timeline [items]="historial()" /></div> }
+  }
+
+  <app-modal [titulo]="'Evaluar a ' + t.nombre" [(abierto)]="evaluar">
+    @for (c of criterios; track c; let i = $index) {
+      <div class="field">
+        <label [for]="'ev' + i">{{ c }}: <output>{{ notas()[i] }}</output></label>
+        <input type="range" [id]="'ev' + i" min="0" max="100" [value]="notas()[i]" (input)="nota(i, $any($event.target).value)" class="min-h-11 accent-cobre">
+      </div>
+    }
+    <div pie><button type="button" class="btn btn-sec" (click)="evaluar = false">Cancelar</button><button type="button" class="btn" (click)="guardar()">Guardar evaluación</button></div>
+  </app-modal>
+} @else {
+  <div class="card"><app-empty titulo="Tercero no encontrado" mensaje="Revisa el identificador."><a class="btn" routerLink="/terceros">Volver</a></app-empty></div>
+}

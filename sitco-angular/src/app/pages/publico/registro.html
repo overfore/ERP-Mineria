@@ -1,0 +1,124 @@
+<section class="px-4 pt-6 pb-12 md:px-6">
+  <div class="max-w-[860px] mx-auto">
+    <h1 id="pgh" tabindex="-1">Registro de empresa contratista</h1>
+    <p class="muted">Una solicitud completa se revisa en menos de 48 horas hábiles. Hoy toma en promedio nueve días porque los documentos llegan por correo y los vencimientos no se advierten.</p>
+
+    @if (enviada()) {
+      <div class="card text-center">
+        <app-icon name="check" class="size-14 text-senal mx-auto" />
+        <h2>Solicitud {{ enviada() }} enviada</h2>
+        <p>Enviamos un correo a <strong>{{ d.mail || 'tu correo' }}</strong> con el comprobante. Plazo de revisión: <strong>48 horas hábiles</strong>.</p>
+        <div class="text-left max-w-md mx-auto">
+          <app-timeline [items]="[{ t: 'Solicitud recibida', w: 'Ahora', s: 'done' }, { t: 'Revisión documental', w: 'Dentro de 24 h', s: 'cur' }, { t: 'Aprobación de Seguridad y Salud Ocupacional', w: 'Dentro de 48 h' }, { t: 'Emisión de credenciales', w: 'Al aprobar' }]" />
+        </div>
+        <div class="flex justify-center flex-wrap gap-3"><a class="btn" routerLink="/login">Ir a ingresar</a><a class="btn btn-sec" routerLink="/">Volver al inicio</a></div>
+      </div>
+    } @else {
+      <app-stepper [pasos]="pasos" [actual]="paso()" />
+      <form class="card" novalidate (submit)="$event.preventDefault(); continuar()">
+        <h2>Paso {{ paso() + 1 }} de {{ pasos.length }} · {{ titulos[paso()] }}</h2>
+
+        @switch (paso()) {
+          @case (0) {
+            <div class="grid gap-x-4 md:grid-cols-2">
+              <app-field label="Razón social" for="rs" ac="empresas" hint="Empieza a escribir para autocompletar si ya existe." (elegido)="d.rs = $event">
+                <input id="rs" name="rs" type="text" appRegla="required|min:3" autocomplete="off" [(ngModel)]="d.rs">
+              </app-field>
+              <app-field label="RUT de la empresa" for="rt"><input id="rt" name="rt" type="text" appRegla="required|rut" placeholder="76.123.456-K" [(ngModel)]="d.rt"></app-field>
+              <app-field label="Giro principal" for="gi">
+                <select id="gi" name="gi" [(ngModel)]="d.gi">@for (g of giros; track g) { <option [value]="g">{{ g }}</option> }</select>
+              </app-field>
+              <app-field label="Número aproximado de trabajadores" for="tr"><input id="tr" name="tr" type="number" appRegla="required|gt0" [(ngModel)]="d.tr"></app-field>
+            </div>
+            <fieldset class="border-0 p-0 m-0"><legend class="lbl-t mb-1.5">Tipo de servicio en faena</legend>
+              <div class="grid gap-2.5 grid-cols-[repeat(auto-fit,minmax(160px,1fr))]">
+                <label class="choice"><input type="radio" name="ts" value="Permanente" [(ngModel)]="d.ts"> Permanente (turno 7x7)</label>
+                <label class="choice"><input type="radio" name="ts" value="Detención mayor" [(ngModel)]="d.ts"> Detención mayor de planta</label>
+              </div>
+            </fieldset>
+          }
+          @case (1) {
+            <div class="grid gap-x-4 md:grid-cols-2">
+              <app-field label="Nombre completo" for="rn"><input id="rn" name="rn" type="text" appRegla="required|min:5" [(ngModel)]="d.rn"></app-field>
+              <app-field label="RUT del representante" for="rr"><input id="rr" name="rr" type="text" appRegla="required|rut" [(ngModel)]="d.rr"></app-field>
+              <app-field label="Correo de contacto" for="mail"><input id="mail" name="mail" type="email" appRegla="required|email" [(ngModel)]="d.mail"></app-field>
+              <app-field label="Teléfono móvil" for="tel"><input id="tel" name="tel" type="tel" appRegla="required|tel" placeholder="+56 9 1234 5678" [(ngModel)]="d.tel"></app-field>
+            </div>
+            <app-field label="Crea una contraseña" for="pwr" hint="Mínimo 10 caracteres con mayúscula, número y símbolo.">
+              <input id="pwr" name="pwr" type="password" appRegla="required|pwd" autocomplete="new-password" [(ngModel)]="d.pwr">
+            </app-field>
+            <app-strength [valor]="d.pwr" />
+            <fieldset class="border-0 p-0 m-0"><legend class="lbl-t mb-1.5">Segundo factor</legend>
+              <div class="grid gap-2.5 grid-cols-[repeat(auto-fit,minmax(160px,1fr))]">
+                <label class="choice"><input type="radio" name="f2" value="app" [(ngModel)]="d.f2"> Aplicación autenticadora</label>
+                <label class="choice"><input type="radio" name="f2" value="sms" [(ngModel)]="d.f2"> SMS al móvil</label>
+              </div>
+            </fieldset>
+          }
+          @case (2) {
+            <p class="muted">Sube los documentos ahora: el sistema los revisa y te avisa antes de que venzan.</p>
+            <div class="grid gap-4 md:grid-cols-2">
+              @for (doc of documentos; track doc[0]) {
+                <app-file-drop [etiqueta]="doc[0]" (subido)="cargados.set(cargados() + 1)" (quitado)="cargados.set(cargados() - 1)" />
+              }
+              <div>
+                <button class="btn btn-sec" type="button" (click)="ejemplos()"><app-icon name="upload" /> Usar archivos de ejemplo</button>
+                <p class="text-[13px] muted mt-2">Atajo de demostración: simula la carga de los tres documentos.</p>
+              </div>
+            </div>
+          }
+          @case (3) {
+            <p class="muted">Agrega al menos una persona. También puedes cargar una planilla; se valida cada RUT.</p>
+            <div class="card-flat">
+              <div class="grid gap-x-4 md:grid-cols-3 items-end">
+                <div class="field" [class.invalid]="errNueva()['n']"><label for="wn">Nombre</label><input id="wn" name="wn" type="text" placeholder="Nombre y apellidos" [(ngModel)]="nueva.n">
+                  @if (errNueva()['n']) { <div class="err-m" role="alert">{{ errNueva()['n'] }}</div> }</div>
+                <div class="field" [class.invalid]="errNueva()['r']"><label for="wr">RUT</label><input id="wr" name="wr" type="text" placeholder="12.345.678-5" [(ngModel)]="nueva.r">
+                  @if (errNueva()['r']) { <div class="err-m" role="alert">{{ errNueva()['r'] }}</div> }</div>
+                <app-field label="Cargo" for="wc" ac="cargos" (elegido)="nueva.c = $event" [class.invalid]="errNueva()['c']">
+                  <input id="wc" name="wc" type="text" placeholder="Escribe para buscar" autocomplete="off" [(ngModel)]="nueva.c">
+                  @if (errNueva()['c']) { <div class="err-m" role="alert">{{ errNueva()['c'] }}</div> }
+                </app-field>
+              </div>
+              <button class="btn btn-sec" type="button" (click)="agregarPersona()"><app-icon name="plus" /> Agregar trabajador</button>
+            </div>
+            <div aria-live="polite" class="mt-4">
+              @if (personas().length) {
+                <div class="overflow-x-auto border border-arena-2 rounded-xl bg-white">
+                  <table class="stack">
+                    <thead><tr><th>Nombre</th><th>RUT</th><th>Cargo</th><th><span class="sr">Acciones</span></th></tr></thead>
+                    <tbody>
+                      @for (w of personas(); track $index; let i = $index) {
+                        <tr><td data-l="Nombre">{{ w.n }}</td><td data-l="RUT">{{ w.r }}</td><td data-l="Cargo">{{ w.c }}</td>
+                          <td><button type="button" class="btn btn-sm btn-ter" (click)="quitarPersona(i)"><app-icon name="trash" /> Quitar</button></td></tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              } @else {
+                <app-empty titulo="Aún no hay trabajadores" mensaje="Agrega la primera persona con el formulario de arriba." />
+              }
+            </div>
+          }
+          @case (4) {
+            <div class="grid gap-4 md:grid-cols-2">
+              <div class="card-flat"><h4>Empresa</h4><p class="text-sm">{{ d.rs }}<br>RUT {{ d.rt }}<br>{{ d.gi }} · {{ d.ts }}</p></div>
+              <div class="card-flat"><h4>Representante</h4><p class="text-sm">{{ d.rn }}<br>{{ d.mail }}<br>{{ d.tel }}</p></div>
+            </div>
+            <div class="card-flat mt-2"><h4 class="mb-0">{{ personas().length }} trabajador{{ personas().length > 1 ? 'es' : '' }} · 3 documentos cargados</h4></div>
+            <div class="field mb-0!"><label class="check font-normal!"><input type="checkbox" name="ok1" appRegla="required" [(ngModel)]="d.ok1"> Acepto los términos de uso y las normas de seguridad de la faena.</label></div>
+            <div class="field mb-0!"><label class="check font-normal!"><input type="checkbox" name="ok2" appRegla="required" [(ngModel)]="d.ok2"> Autorizo el tratamiento de datos personales de mis trabajadores conforme a la Ley N° 21.719 (incluye datos de salud ocupacional, de acceso restringido).</label></div>
+          }
+        }
+
+        <div class="flex justify-between flex-wrap gap-3 mt-4">
+          <button type="button" class="btn btn-sec" [disabled]="paso() === 0" (click)="atras()"><app-icon name="chL" /> Atrás</button>
+          <div class="flex flex-wrap gap-3">
+            <button type="button" class="btn btn-ter" (click)="guardar()">Guardar borrador</button>
+            <button type="submit" class="btn">{{ paso() === 4 ? 'Enviar solicitud' : 'Continuar' }} <app-icon [name]="paso() === 4 ? 'check' : 'chR'" /></button>
+          </div>
+        </div>
+      </form>
+    }
+  </div>
+</section>

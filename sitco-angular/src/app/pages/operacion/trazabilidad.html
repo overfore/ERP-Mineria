@@ -1,0 +1,73 @@
+<app-page-header titulo="Trazabilidad de lotes" sub="Del embarque al polígono de origen, y del polígono a los embarques, con evidencia y no con estimación.">
+  <a class="btn" routerLink="/trazabilidad/nuevo"><app-icon name="plus" /> Conformar lote</a>
+</app-page-header>
+
+<app-tabs [items]="tabs" [(activa)]="tab" />
+
+@switch (tab()) {
+  @case ('lotes') {
+    <app-data-table [rows]="embarques" [cols]="cols" [filtros]="filtros" [tam]="7" caption="Lotes de embarque" buscarPh="Buscar embarque o nave…" [buscarEn]="['id', 'nave', 'comprador']">
+      <button type="button" class="btn btn-sec" (click)="exportarLotes()"><app-icon name="dl" /> Exportar</button>
+      <ng-template appCell="id" let-r><a [routerLink]="['/trazabilidad/lote', r.id]"><strong>{{ r.id }}</strong></a></ng-template>
+      <ng-template appCell="t" let-r>{{ nf(r.t) }}</ng-template>
+      <ng-template appCell="cu" let-r>{{ nd(r.cu, 1) }}</ng-template>
+      <ng-template appCell="as" let-r><span [class]="r.as > asLim ? 'text-error font-bold' : ''">{{ nd(r.as, 2) }}{{ r.as > asLim ? ' ▲' : '' }}</span></ng-template>
+      <ng-template appCell="estado" let-r><app-estado [v]="r.estado" /></ng-template>
+      <ng-template appCell="fecha" let-r>{{ fd(r.fecha) }}</ng-template>
+      <ng-template appCell="acc" let-r>
+        <app-menu etiqueta="Más acciones">
+          <span boton><app-icon name="dots" /></span>
+          <a role="menuitem" class="menu-item" [routerLink]="['/trazabilidad/lote', r.id]">Ver cadena de custodia</a>
+          <button role="menuitem" type="button" class="menu-item" (click)="exportarLote(r.id)">Exportar evidencia</button>
+        </app-menu>
+      </ng-template>
+    </app-data-table>
+  }
+  @case ('inv') {
+    <app-card titulo="¿A qué embarques llegó este polígono?">
+      <form class="grid gap-x-4 md:grid-cols-2 items-end" (submit)="$event.preventDefault(); seguir()">
+        <app-field label="Polígono de extracción" for="pq" ac="polis" hint="Escribe “B30” para ver sugerencias." (elegido)="poligono = $event">
+          <input id="pq" name="pq" type="text" autocomplete="off" [value]="poligono" (input)="poligono = $any($event.target).value">
+        </app-field>
+        <div class="field"><button type="submit" class="btn"><app-icon name="search" /> Seguir hacia adelante</button></div>
+      </form>
+      <div aria-live="polite">
+        @if (buscando()) { <app-skeleton [n]="1" /> }
+        @else if (resultado(); as res) {
+          @if (!res.p) {
+            <app-empty titulo="Polígono no encontrado" mensaje="Elige uno de la lista de sugerencias, por ejemplo B3000-P106." />
+          } @else {
+            <app-banner tipo="ok" class="mt-4">Polígono <strong>{{ res.p.id }}</strong> · ley {{ nd(res.p.ley, 2) }} % Cu · {{ nf(res.p.as) }} ppm As · extraído el {{ fd(res.p.fecha) }}. Seguimiento completado en <strong>1,2 s</strong> (antes: semanas de revisión de carpetas).</app-banner>
+            @if (res.r.length) {
+              <div class="overflow-x-auto border border-arena-2 rounded-xl bg-white">
+                <table class="stack">
+                  <thead><tr><th>Embarque</th><th>Stock intermedio</th><th class="text-right">Toneladas aportadas</th><th class="text-right">% del lote</th><th>Estado</th></tr></thead>
+                  <tbody>
+                    @for (x of res.r; track x.e.id) {
+                      <tr>
+                        <td data-l="Embarque"><a [routerLink]="['/trazabilidad/lote', x.e.id]">{{ x.e.id }}</a></td>
+                        <td data-l="Stock">{{ x.c.stock }}</td>
+                        <td data-l="Toneladas" class="text-right tabular-nums">{{ nf(x.c.t) }}</td>
+                        <td data-l="%" class="text-right tabular-nums">{{ nd(x.c.pct * 100, 1) }} %</td>
+                        <td data-l="Estado"><app-estado [v]="x.e.estado" /></td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            } @else {
+              <app-empty titulo="Aún no llegó a ningún embarque" mensaje="El mineral de este polígono sigue en stock intermedio." />
+            }
+          }
+        }
+      </div>
+    </app-card>
+  }
+  @case ('ciclo') {
+    <app-card titulo="El ciclo del mineral, en ocho pasos" sub="Cada paso conserva qué pasó, cuándo, con qué versión del plan y de qué sistema vino el dato.">
+      <app-timeline [items]="ciclo" />
+    </app-card>
+  }
+}
+
+<app-export-dialog [(abierto)]="exportar" [titulo]="exportTitulo" [csv]="exportCsv" />

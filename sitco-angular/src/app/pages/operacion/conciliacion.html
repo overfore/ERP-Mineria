@@ -1,0 +1,71 @@
+<app-page-header titulo="Conciliación metalúrgica" sub="Mina–planta–embarque cuadrados en pocos días. Cuando hay diferencia, se explica en qué punto de la cadena se produjo.">
+  <button type="button" class="btn btn-sec" (click)="exportar = true"><app-icon name="dl" /> Exportar</button>
+  <button type="button" class="btn" (click)="cerrarMes()"><app-icon name="check" /> Cerrar el mes</button>
+</app-page-header>
+
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <app-kpi lbl="Diferencia mina–planta–embarque" val="2,6" unit="%" dlt="▼ desde 4,7 % hace 6 meses" cls="good" />
+  <app-kpi lbl="Día de cierre" val="D+2" dlt="Meta: máximo 3 días hábiles (antes: 18)" cls="good" />
+  <app-kpi lbl="Puntos por explicar" [val]="porExplicar()" dlt="Cada diferencia necesita causa" cls="bad" />
+  <app-kpi lbl="Fuente de verdad del tonelaje" val="Balanza" dlt="Calibrada contra báscula (supuesto S-04)" cls="neu" />
+</div>
+
+<div class="grid gap-4 md:grid-cols-2 mt-4">
+  <app-card titulo="¿Cuál de las tres mediciones es la buena?">
+    <p class="text-sm muted">Hoy cada área usa la que le conviene. Propuesta: la balanza de alimentación es la referencia, calibrada contra la báscula de control; el pesaje a bordo se corrige con un factor que se recalcula cada semana.</p>
+    <div [innerHTML]="mediciones | html"></div>
+    <p class="text-[13px] muted">Datos de demostración. Diferencia total entre extremos: {{ extremos }} %.</p>
+  </app-card>
+  <app-card titulo="Diferencia mensual">
+    <div [innerHTML]="mensual | html"></div>
+    <p class="text-[13px] muted">Línea base 2025: entre 3,1 % y 6,8 %, sin explicación por punto.</p>
+  </app-card>
+</div>
+
+<app-card class="mt-4" titulo="Diferencias por punto de la cadena" sub="Una diferencia explicada deja de ser un misterio recurrente.">
+  <app-data-table [rows]="puntos()" [cols]="cols" [buscar]="false" [tam]="10" caption="Diferencias por punto">
+    <ng-template appCell="a" let-r>{{ r.a }}<br><span class="tabular-nums text-sm">{{ nf(r.va) }}</span></ng-template>
+    <ng-template appCell="b" let-r>{{ r.b }}<br><span class="tabular-nums text-sm">{{ nf(r.vb) }}</span></ng-template>
+    <ng-template appCell="d" let-r><strong>{{ dif(r) }} %</strong></ng-template>
+    <ng-template appCell="ex" let-r><app-estado [v]="r.ex ? 'Explicada' : 'Por explicar'" /></ng-template>
+    <ng-template appCell="acc" let-r><button type="button" class="btn btn-sm btn-sec" (click)="abrir(r)">{{ r.ex ? 'Ver causa' : 'Explicar' }}</button></ng-template>
+  </app-data-table>
+</app-card>
+
+<app-card class="mt-4" titulo="Cierre del mes en tres días hábiles">
+  <app-timeline [items]="cierre" />
+</app-card>
+
+<app-export-dialog [(abierto)]="exportar" titulo="Conciliación del mes por punto de la cadena" [csv]="csv" />
+
+<app-modal [titulo]="'Explicar diferencia · ' + (explicando?.punto || '')" [abierto]="!!explicando" (abiertoChange)="$event || (explicando = null)">
+  @if (explicando; as r) {
+    @if (r.ex) {
+      <p class="text-sm"><strong>Causa registrada:</strong> {{ r.causa }}</p>
+      <p class="muted text-sm">Registrada por Metalurgia con evidencia adjunta.</p>
+    } @else {
+      <p class="text-sm">Diferencia de <strong>{{ dif(r) }} %</strong> entre {{ r.a }} y {{ r.b }}.</p>
+      <div class="field"><label for="cz">Causa</label>
+        <select id="cz" [(ngModel)]="causa">@for (c of causas; track c) { <option [value]="c">{{ c }}</option> }</select></div>
+      <div class="field" [class.invalid]="errComentario()"><label for="cm">Comentario <span class="text-error" aria-hidden="true">*</span></label>
+        <textarea id="cm" [(ngModel)]="comentario" aria-required="true"></textarea>
+        <div class="hint">Mínimo 10 caracteres.</div>
+        @if (errComentario()) { <div class="err-m" role="alert">{{ errComentario() }}</div> }</div>
+    }
+  }
+  <div pie>
+    @if (explicando?.ex) { <button type="button" class="btn btn-sec" (click)="explicando = null">Cerrar</button> }
+    @else {
+      <button type="button" class="btn btn-sec" (click)="explicando = null">Cancelar</button>
+      <button type="button" class="btn" (click)="guardarExplicacion()">Guardar explicación</button>
+    }
+  </div>
+</app-modal>
+
+<app-modal titulo="Cerrar la conciliación del mes" [(abierto)]="confirmarCierre">
+  <p>Se congelan las mediciones y se entregan los datos a SAP. Es una acción crítica y queda auditada.</p>
+  <div pie>
+    <button type="button" class="btn btn-sec" (click)="confirmarCierre = false">Cancelar</button>
+    <button type="button" class="btn btn-danger" (click)="confirmarCierreMes()">Cerrar el mes</button>
+  </div>
+</app-modal>

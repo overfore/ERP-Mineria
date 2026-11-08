@@ -1,0 +1,38 @@
+<app-page-header titulo="Equipos y detenciones" sub="Una sola vista cruza despacho, telemetría de los tres fabricantes y las pautas de SAP. Antes: cuatro sistemas y una radio." />
+
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <app-kpi lbl="Operando" [val]="operando" [unit]="'de ' + equipos.length" />
+  <app-kpi lbl="Detenidos ahora" [val]="detenidos().length" [dlt]="sinClasificar() + ' sin clasificar'" cls="bad" />
+  <app-kpi lbl="Utilización efectiva" [val]="74" unit="%" dlt="Línea base 71 % · meta interna 80 %" cls="good" />
+  <app-kpi lbl="Falla a diagnóstico" val="38" unit="min" dlt="Línea base: 4,2 horas" cls="good" />
+</div>
+
+<div class="mt-4">
+  <app-tabs [items]="tabs()" [(activa)]="tab" />
+  @if (tab() === 'f') {
+    <app-data-table [rows]="equipos" [cols]="cols" [filtros]="filtros" [tam]="10" caption="Flota de equipos" buscarPh="Buscar equipo, tipo o zona…"
+      [buscarEn]="['id', 'tipo', 'fab', 'zona']" [masivas]="[{ id: 'csv', label: 'Exportar selección' }]" (masiva)="exportar($event.ids)">
+      <ng-template appCell="id" let-r><a [routerLink]="['/equipos', r.id]"><strong>{{ r.id }}</strong></a></ng-template>
+      <ng-template appCell="estado" let-r><app-estado [v]="r.estado" /></ng-template>
+      <ng-template appCell="util" let-r>{{ r.util }} %</ng-template>
+      <ng-template appCell="hs" let-r>{{ nf(r.hs) }}</ng-template>
+    </app-data-table>
+  } @else {
+    <div class="flex flex-col gap-3">
+      @for (e of detenidos(); track e.id) {
+        <div class="card-flat flex justify-between items-center flex-wrap gap-3">
+          <div>
+            <a [routerLink]="['/equipos', e.id]"><strong>{{ e.id }}</strong></a> <span class="muted text-sm">{{ e.tipo }} · {{ e.zona }}</span>
+            <div class="text-sm">Detenido hace <strong>{{ desde(e.det!.desde) }}</strong> · <app-estado [v]="e.det!.causa" /></div>
+          </div>
+          <div class="flex flex-wrap gap-3">
+            <a class="btn btn-sm btn-sec" [routerLink]="['/equipos', e.id]">Ver vista única</a>
+            @if (e.det!.causa === 'Sin clasificar') { <button type="button" class="btn btn-sm" (click)="clasificar = e.id">Clasificar causa</button> }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<app-clasificar-detencion [equipo]="clasificar" (cerrar)="clasificar = null" (listo)="clasificado()" />

@@ -1,0 +1,141 @@
+<app-page-header titulo="Terreno: la vista de quien opera" sub="Dos vistas: la Botonera de Pala, sin pantalla, y la tableta de supervisión. Un toque en el destino correcto registra el cambio de material: no se agregan pasos al ciclo productivo.">
+  <label class="switch"><input type="checkbox" [checked]="ses.sol()" (change)="alternarSol($any($event.target).checked)"><span class="tr"></span><span>Modo sol</span></label>
+</app-page-header>
+
+<div class="grid gap-6 min-[1000px]:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+  <div>
+    <div class="flex flex-wrap gap-3 mb-3" role="group" aria-label="Opciones de demostración">
+      <button type="button" class="btn btn-sm" [class.btn-sec]="vista() !== 'op'" [attr.aria-pressed]="vista() === 'op'" (click)="cambiarVista('op')">Operador de pala (botonera)</button>
+      <button type="button" class="btn btn-sm" [class.btn-sec]="vista() !== 'sup'" [attr.aria-pressed]="vista() === 'sup'" (click)="cambiarVista('sup')">Supervisor (tableta)</button>
+      @if (vista() === 'sup') { <button type="button" class="btn btn-sm btn-sec" (click)="cambiarTipo()">{{ tipo() === 'tablet' ? 'Ver como teléfono' : 'Ver como tableta' }}</button> }
+    </div>
+
+    @if (vista() === 'op') {
+      <!-- Botonera de Pala (Figura 3.10 del Subdocumento 3): dispositivo físico, sin pantalla. Sus colores son los del dispositivo. -->
+      <div class="w-full max-w-[380px] mx-auto">
+        <div class="grid gap-3 p-3.5 bg-[#3A4150] border-[6px] border-[#262A30] rounded-[22px] shadow-suave" role="group" aria-label="Botonera de Pala de PA-03">
+          <div class="flex gap-4 px-1 text-white" role="group" aria-label="Luces de la botonera">
+            <span class="inline-block size-3.5 rounded-full border-2" [class]="registrado() ? 'bg-[#4AA3FF] border-white' : 'bg-[#262A30] border-white/45'" role="img" [attr.aria-label]="'Luz azul: ' + (registrado() ? 'registrado' : 'sin registro nuevo')"></span>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            @for (d of destinos; track d[0]) {
+              <button type="button" class="relative min-h-32 w-full rounded-[14px] border-4 border-black/40 font-titulo font-bold text-2xl uppercase tracking-wide cursor-pointer active:scale-[.98]" [class]="d[1]"
+                [attr.aria-label]="'Declarar destino ' + d[0] + (d[0] === plan ? ' (destino del plan)' : '')" (click)="declarar(d[0])">
+                {{ d[0] }}
+                @if (d[0] === plan) { <i class="absolute top-2 left-1/2 -translate-x-1/2 size-3.5 rounded-full bg-white border-2 border-black/40" aria-hidden="true"></i> }
+              </button>
+            }
+          </div>
+          <div class="flex items-center gap-2.5 min-h-16 px-3 py-2.5 rounded-xl bg-[#262A30] text-white font-semibold">
+            @if (credencial()) { <app-icon name="check" class="size-6" /><span>Credencial de Eleodoro Painemal · turno día</span> }
+            @else {
+              <button type="button" class="flex items-center gap-2.5 w-full min-h-14 px-3 bg-transparent border-2 border-dashed border-white/60 rounded-[10px] text-white font-semibold cursor-pointer" (click)="leerCredencial()">
+                <app-icon name="badge" class="size-6" />Toque su credencial<small class="font-normal opacity-85">(simulado)</small></button>
+            }
+          </div>
+        </div>
+        <p class="text-sm muted text-center mt-2.5 mb-0">Cabina de PA-03 · polígono B3015-P106 · turno día</p>
+        <div aria-live="polite" class="min-h-23">
+          @if (aviso(); as a) {
+            <app-banner tipo="ok" class="mb-0! mt-2" role="status"><strong>{{ a.t }}</strong><div class="text-[13px]">{{ sim.lte === 'shadow' ? 'Guardado en el equipo. Se enviará solo al volver la señal.' : 'Guardado.' }}</div></app-banner>
+            @if (a.sinCred) { <p class="text-[13px] muted text-center">Sin toque de credencial: el sistema registró el hecho como "operador no identificado" y avisó al supervisor.</p> }
+          } @else {
+            <p class="text-sm muted text-center my-3.5">Hoy: {{ cuenta() }} declaraciones · 0 pasos extra: aprietas el botón de lo que ves</p>
+          }
+        </div>
+        <p class="text-[13px] muted text-center">Luz blanca: destino del plan · luz azul: registrado</p>
+      </div>
+    } @else {
+      <!-- Tableta o teléfono de supervisión -->
+      <div class="mx-auto border-[10px] border-pizarra bg-arena overflow-hidden shadow-suave flex flex-col"
+        [class]="tipo() === 'tablet' ? 'w-full max-w-[860px] rounded-[22px] min-h-[520px]' : 'w-full max-w-[380px] rounded-[34px] min-h-[700px]'">
+        <div class="flex justify-between items-center gap-2 px-3.5 py-2.5 bg-pizarra text-white text-[13px]">
+          <span><strong>Supervisor · Rampa norte</strong> · Turno día</span>
+          <span class="flex items-center gap-1.5"><span class="size-2.5 rounded-full" [class]="estadoEquipo()[0] === 'ok' ? 'bg-[#58D3A5]' : 'bg-[#FFC24A]'"></span><span class="text-[13px]">{{ estadoEquipo()[1] }}</span></span>
+        </div>
+        <div class="p-3.5 flex-1 flex flex-col gap-3">
+          <app-tabs [items]="tabs" [(activa)]="tab" />
+          @switch (tab()) {
+            @case ('inc') {
+              <form novalidate (submit)="$event.preventDefault(); guardarIncidente()">
+                <app-field label="Tipo" for="it"><select id="it" name="it" [(ngModel)]="inc.tipo"><option>Cuasi accidente</option><option>Observación de conducta</option><option>Incidente con lesión leve</option></select></app-field>
+                <app-field label="Lugar" for="il"><select id="il" name="il" [(ngModel)]="inc.lugar"><option>Rampa norte · km 2</option><option>Fondo del rajo</option><option>Botadero sur</option><option>Taller</option><option>Planta · chancado</option></select></app-field>
+                <app-field label="Hora del hecho" for="ih" hint="La hora de registro se guarda aparte, de forma automática."><input id="ih" name="ih" type="time" appRegla="required" [(ngModel)]="inc.hora"></app-field>
+                <app-field label="Descripción" for="idesc" hint="Describe lo ocurrido. Mínimo 10 caracteres."><textarea id="idesc" name="idesc" appRegla="required|min:10" [(ngModel)]="inc.desc"></textarea></app-field>
+                <div class="flex items-center gap-3 mb-3"><button type="button" class="btn btn-sec" (click)="foto.set(true)"><app-icon name="cam" /> Agregar foto</button><span class="text-sm muted">{{ foto() ? '✓ 1 foto agregada' : '' }}</span></div>
+                <div class="lbl-t">Firma en terreno</div>
+                <app-firma #firmaInc />
+                <div class="flex justify-between items-center gap-3 mt-2">
+                  <button type="button" class="btn btn-sm btn-ter" (click)="firmaInc.borrar()">Borrar firma</button>
+                  <button type="submit" class="btn"><app-icon name="check" /> Guardar y firmar</button>
+                </div>
+              </form>
+            }
+            @case ('ins') {
+              <p class="text-sm muted">Inspección IP-120 · Iluminación de caminos</p>
+              @for (x of inspeccion; track x; let i = $index) {
+                <div class="card-flat flex justify-between items-center flex-wrap gap-3 mb-2">
+                  <span class="text-sm">{{ x }}</span>
+                  <span class="flex gap-1.5">
+                    <label class="choice min-h-12! px-3! py-1.5!"><input type="radio" [name]="'ins' + i" value="ok" [(ngModel)]="respuestas[i]"> Sí</label>
+                    <label class="choice min-h-12! px-3! py-1.5!"><input type="radio" [name]="'ins' + i" value="no" [(ngModel)]="respuestas[i]"> No</label>
+                  </span>
+                </div>
+              }
+              <div class="lbl-t">Firma en terreno</div>
+              <app-firma #firmaIns />
+              <div class="mt-2"><button type="button" class="btn btn-sm btn-ter" (click)="firmaIns.borrar()">Borrar firma</button></div>
+              <button type="button" class="btn w-full mt-2" (click)="firmarInspeccion()"><app-icon name="check" /> Firmar inspección</button>
+            }
+            @case ('fal') {
+              <p class="text-sm muted">Aviso de falla de un equipo. Llega a SAP sin que nadie lo transcriba desde la radio.</p>
+              <app-field label="Equipo" for="fe"><select id="fe" [(ngModel)]="falla.equipo">@for (e of equipos; track e) { <option [value]="e">{{ e }}</option> }</select></app-field>
+              <app-field label="Componente" for="fc"><select id="fc" [(ngModel)]="falla.comp"><option>Motor / hidráulico</option><option>Frenos</option><option>Neumáticos</option><option>Eléctrica</option><option>Cabina / seguridad</option><option>Otro</option></select></app-field>
+              <button type="button" class="btn w-full" (click)="avisoFalla()"><app-icon name="wrench" /> Enviar aviso a SAP</button>
+            }
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="flex flex-col gap-3">
+    <div class="card">
+      <h3>Cola de este equipo</h3>
+      @for (e of cola(); track e.id) {
+        <div class="flex gap-2 items-center py-1.5 border-b border-arena-2 last:border-0 text-[13px]">
+          <span class="flex gap-1" [attr.aria-label]="['En equipo', 'En el Nodo', 'En nube'][e.tier]">
+            @for (k of [0, 1, 2]; track k) { <i class="size-2.5 rounded-full border" [class]="e.tier >= k ? 'bg-senal border-senal' : 'bg-acero-l border-acero'"></i> }
+          </span>
+          <span class="flex-1 min-w-0"><strong>{{ e.type }}</strong> · {{ e.label }}</span><span class="muted">{{ ft(e.ts) }}</span>
+        </div>
+      } @empty {
+        <p class="text-sm muted">Aún no hay registros. {{ vista() === 'op' ? 'Aprieta un botón de destino.' : 'Firma un incidente o una inspección.' }}</p>
+      }
+      <p class="text-[13px] muted mt-2">Los tres puntos son: equipo → Nodo de Faena → nube.</p>
+    </div>
+    <app-card titulo="Por qué está diseñado así">
+      @if (vista() === 'op') {
+        <ul class="text-sm pl-[18px] m-0 list-disc">
+          <li><strong>Guantes:</strong> cuatro botones grandes, sin teclear ni pantalla táctil.</li>
+          <li><strong>Sol:</strong> botones de colores y luces, sin pantalla que ofusque.</li>
+          <li><strong>Sin señal:</strong> guarda las declaraciones cifradas al menos 48 horas y las envía al volver el enlace (criterio 13).</li>
+          <li><strong>Cero pasos extra:</strong> el destino que aprietas es la razón del cambio, y la credencial se toca una vez por turno.</li>
+          <li><strong>Contexto automático:</strong> pala, polígono, hora y posición se completan solos.</li>
+        </ul>
+      } @else {
+        <ul class="text-sm pl-[18px] m-0 list-disc">
+          <li><strong>Guantes:</strong> objetivos táctiles de al menos 44 × 44 px, sin teclear en las acciones frecuentes.</li>
+          <li><strong>Sol:</strong> modo de alto contraste, texto grande.</li>
+          <li><strong>Sin señal:</strong> guarda en el equipo y envía al volver (criterio 13).</li>
+          <li><strong>Registro en el lugar:</strong> lo que hoy se anota en planillas al final del turno se firma en la tableta.</li>
+          <li><strong>Contexto automático:</strong> pala, polígono, hora y posición se completan solos.</li>
+        </ul>
+      }
+    </app-card>
+    <div class="card-flat"><div class="text-sm"><strong>Prueba:</strong>
+      @if (vista() === 'op') { abre “Simular nube”, activa <em>zona sin cobertura</em> y aprieta un destino. Verás el aviso “Guardado en el equipo” y el registro quedarse en el equipo y subir solo al restablecerse. }
+      @else { registra un incidente con firma, o firma una inspección, y mira cómo queda en la cola de este equipo. }
+    </div></div>
+  </div>
+</div>

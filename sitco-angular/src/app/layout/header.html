@@ -1,0 +1,56 @@
+@if (auth()) {
+  <button type="button" class="ibtn lg:hidden! hover:bg-white/15" aria-label="Abrir menú de navegación" [attr.aria-expanded]="page.navAbierto()" aria-controls="nav"
+    (click)="page.navAbierto.set(!page.navAbierto())"><app-icon name="menu" /></button>
+}
+<a [routerLink]="auth() ? '/inicio' : '/'" class="flex items-center gap-1.5 md:gap-2.5 text-white no-underline font-titulo font-bold text-[17px] md:text-[22px] tracking-wide hover:text-white"
+  [attr.aria-label]="brand.product + ', ir al inicio'">
+  <span class="grid place-items-center size-[34px] rounded-lg bg-cobre"><app-icon name="layers" /></span>
+  <span>{{ brand.product }}<small class="hidden md:block font-texto font-medium text-[11px] tracking-wider uppercase opacity-75 -mt-0.5">Altos de Aranda · por {{ brand.vendor }}</small></span>
+</a>
+<span class="flex-1"></span>
+
+@if (auth()) {
+  <a id="conn" routerLink="/conectividad" class="inline-flex items-center gap-2 min-h-11 px-3 rounded-full border text-white text-[13px] font-semibold no-underline hover:text-white"
+    [class]="sim.mode() === 'down' ? 'border-[#FFC24A]' : 'border-white/35'" [attr.aria-label]="'Estado de conectividad: ' + conexion() + '. Abrir detalle'">
+    <span class="size-2.5 rounded-full" [class]="punto()"></span><span class="hidden md:inline">{{ conexion() }}</span>
+  </a>
+
+  <app-menu etiqueta="Notificaciones: 3 nuevas" claseBoton="ibtn relative hover:bg-white/15" ancho="w-[min(360px,92vw)]">
+    <span boton><app-icon name="bell" /><span class="badge-n absolute top-0.5 right-0.5 min-w-[18px] h-[18px] text-[11px]">3</span></span>
+    @for (n of notifs; track n.t) {
+      <a role="menuitem" [routerLink]="n.h" class="menu-item h-auto! flex-col items-start! gap-0.5 py-2.5"><strong class="text-sm">{{ n.t }}</strong><span class="text-[13px] muted">{{ n.d }}</span></a>
+    }
+  </app-menu>
+
+  <a routerLink="/ayuda" class="ibtn hidden! md:inline-grid! hover:bg-white/15" aria-label="Ayuda y accesibilidad"><app-icon name="help" /></a>
+
+  @if (ses.rol(); as r) {
+    <app-menu claseBoton="flex items-center gap-1 md:gap-2.5 min-h-11 px-1 md:px-2 rounded-lg bg-transparent border-0 text-white text-sm font-medium cursor-pointer hover:bg-white/15" ancho="w-[min(320px,92vw)]">
+      <span boton class="contents">
+        <span class="grid place-items-center size-[34px] rounded-full bg-arena text-pizarra font-titulo font-bold text-sm" aria-hidden="true">{{ ses.user()?.ini }}</span>
+        <span class="hidden md:inline">{{ r.label }}</span><app-icon name="chD" class="max-md:hidden!" />
+      </span>
+      <div class="px-3 py-2"><strong>{{ r.person }}</strong>
+        <div class="text-[13px] muted">{{ r.label }} · {{ ses.user()?.role === 'operador' ? 'toque de credencial, sin sesión' : 'sesión federada con el directorio corporativo' }}</div></div>
+      <hr class="border-0 border-t border-arena-2">
+      <button role="menuitem" type="button" class="menu-item" (click)="ses.cambiarPerfil.set(true)"><app-icon name="users" /> Cambiar de perfil (demostración)</button>
+      <button role="menuitem" type="button" class="menu-item" (click)="ses.alternarSol()"><app-icon name="sun" /> Modo sol (alto contraste)</button>
+      <button role="menuitem" type="button" class="menu-item" (click)="ses.alternarGrande()"><app-icon name="eye" /> Texto grande</button>
+      <button role="menuitem" type="button" class="menu-item" (click)="repetirTour()"><app-icon name="play" /> Repetir recorrido guiado</button>
+      <button role="menuitem" type="button" class="menu-item" (click)="confirmarSalida = true"><app-icon name="out" /> Cerrar sesión</button>
+    </app-menu>
+  }
+} @else {
+  <nav aria-label="Principal" class="flex gap-1">
+    <a routerLink="/registro" class="btn btn-ter text-white! hidden! sm:inline-flex!">Registro de contratistas</a>
+    <a routerLink="/login" class="btn">Ingresar</a>
+  </nav>
+}
+
+<app-modal titulo="Cerrar sesión" [(abierto)]="confirmarSalida">
+  <p>¿Quieres cerrar tu sesión? Los registros pendientes de sincronizar quedan resguardados en el equipo.</p>
+  <div pie>
+    <button type="button" class="btn btn-sec" (click)="confirmarSalida = false">Cancelar</button>
+    <button type="button" class="btn" (click)="confirmarSalida = false; ses.logout()">Cerrar sesión</button>
+  </div>
+</app-modal>

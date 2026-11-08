@@ -1,0 +1,79 @@
+<app-page-header titulo="Seguridad y fatiga" sub="Los registros nacen digitales en el lugar del hecho y se pueden mostrar a la autoridad sin buscar carpetas. Toda alerta de fatiga tiene una acción documentada.">
+  <a class="btn" routerLink="/terreno"><app-icon name="plus" /> Registrar en terreno</a>
+</app-page-header>
+
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <app-kpi lbl="Incidentes del mes" [val]="8" dlt="Todos digitales y firmados" cls="neu" />
+  <app-kpi lbl="En investigación" [val]="enInvestigacion" cls="bad" />
+  <app-kpi lbl="Alertas de fatiga sin acción" [val]="sinAccion()" dlt="Plazo: dentro del turno" [cls]="sinAccion() ? 'bad' : 'good'" />
+  <app-kpi lbl="Observaciones de auditoría" val="6 → 0" dlt="Por trazabilidad de registros" cls="good" />
+</div>
+
+<div class="mt-4">
+  <app-tabs [items]="tabs" [(activa)]="tab" />
+  @switch (tab()) {
+    @case ('i') {
+      <app-data-table [rows]="incidentes" [cols]="colsInc" [filtros]="filtrosInc" [tam]="6" caption="Incidentes e inspecciones" [buscarEn]="['id', 'tipo', 'lugar']">
+        <ng-template appCell="id" let-r><strong>{{ r.id }}</strong></ng-template>
+        <ng-template appCell="f" let-r>{{ fdt(r.f) }}</ng-template>
+        <ng-template appCell="sev" let-r><app-estado [v]="r.sev" /></ng-template>
+        <ng-template appCell="estado" let-r><app-estado [v]="r.estado" /></ng-template>
+        <ng-template appCell="acc" let-r>
+          <app-menu etiqueta="Más acciones">
+            <span boton><app-icon name="dots" /></span>
+            <button role="menuitem" type="button" class="menu-item" (click)="viendo = r">Ver registro firmado</button>
+            <button role="menuitem" type="button" class="menu-item" (click)="exportarInc(r.id)">Exportar para fiscalización</button>
+          </app-menu>
+        </ng-template>
+      </app-data-table>
+    }
+    @case ('f') {
+      <app-banner tipo="info">Datos sensibles (Ley N° 21.719): el acceso a fatiga y somnolencia está restringido por rol y queda auditado.</app-banner>
+      <app-data-table [rows]="fatiga()" [cols]="colsFat" [tam]="7" caption="Alertas de fatiga" [buscarEn]="['id', 'eq', 'op', 'tipo']" [filtros]="[{ key: 'tipo', label: 'Tipo', options: ['Somnolencia', 'Microsueño', 'Distracción'] }]">
+        <ng-template appCell="eq" let-r><a [routerLink]="['/equipos', r.eq]">{{ r.eq }}</a></ng-template>
+        <ng-template appCell="f" let-r>{{ fdt(r.f) }}</ng-template>
+        <ng-template appCell="accion" let-r>
+          @if (r.accion) { <app-estado [v]="'✓ ' + r.accion" tipo="ok" /><div class="text-[13px] muted">{{ r.por }}</div> }
+          @else { <app-estado v="Sin acción" tipo="err" /> }
+        </ng-template>
+        <ng-template appCell="acc" let-r>@if (!r.accion) { <button type="button" class="btn btn-sm" (click)="abrirAccion(r)">Registrar acción</button> }</ng-template>
+      </app-data-table>
+    }
+    @case ('n') {
+      <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        @for (x of inspecciones; track x.id) {
+          <div class="card">
+            <h4>{{ x.n }}</h4>
+            <div class="font-titulo font-bold text-[34px] leading-none text-cobre">{{ x.ok }}/{{ x.tot }}</div>
+            <div class="bar mt-2" [class.warn]="x.ok < x.tot"><i [style.width.%]="x.ok / x.tot * 100"></i></div>
+            <p class="text-[13px] muted mt-2">{{ x.ok === x.tot ? 'Completa y firmada en terreno.' : (x.tot - x.ok) + ' puntos pendientes.' }}</p>
+            <a class="btn btn-sm btn-sec" routerLink="/terreno">Abrir inspección</a>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>
+
+<app-modal [titulo]="(viendo?.id || '') + ' · ' + (viendo?.tipo || '')" [abierto]="!!viendo" (abiertoChange)="$event || (viendo = null)">
+  @if (viendo; as i) {
+    <p class="text-sm"><strong>Lugar:</strong> {{ i.lugar }}<br><strong>Fecha:</strong> {{ fdt(i.f) }}<br><strong>Registrado por:</strong> {{ i.by }} · <strong>Firma digital:</strong> ✓ en el lugar del hecho · <strong>Origen:</strong> app de terreno (offline)</p>
+    <app-timeline [items]="traza(i)" />
+  }
+  <div pie><button type="button" class="btn btn-sec" (click)="viendo = null">Cerrar</button></div>
+</app-modal>
+
+<app-modal [titulo]="'Registrar acción · ' + (alerta?.id || '')" [abierto]="!!alerta" (abiertoChange)="$event || (alerta = null)">
+  @if (alerta; as f) {
+    <p class="text-sm">{{ f.tipo }} en {{ f.eq }} ({{ f.op }}) a las {{ ft(f.f) }}.</p>
+    <fieldset class="border-0 p-0 m-0 mb-4"><legend class="lbl-t mb-1.5">Acción tomada</legend>
+      <div class="grid gap-2.5">
+        @for (a of acciones; track a) { <label class="choice"><input type="radio" name="fa" [value]="a" [(ngModel)]="accion"> {{ a }}</label> }
+      </div>
+    </fieldset>
+    <div class="field"><label for="fc">Comentario</label><textarea id="fc" [(ngModel)]="comentario"></textarea><div class="hint">Opcional.</div></div>
+  }
+  <div pie><button type="button" class="btn btn-sec" (click)="alerta = null">Cancelar</button><button type="button" class="btn" (click)="guardarAccion()">Guardar acción</button></div>
+</app-modal>
+
+<app-export-dialog [(abierto)]="exportar" [titulo]="exportando" />

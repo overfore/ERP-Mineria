@@ -1,0 +1,42 @@
+<section class="max-w-[640px] mx-auto my-8 px-4">
+  <h1 id="pgh" tabindex="-1" class="text-[28px]!">Recuperar acceso</h1>
+  <app-stepper [pasos]="pasos" [actual]="paso()" />
+
+  <div class="card">
+    <form novalidate (submit)="$event.preventDefault(); continuar()">
+      @switch (paso()) {
+        @case (0) {
+          <h2>Paso 1 de 3 · Cuéntanos quién eres</h2>
+          <p class="muted">Las cuentas corporativas se recuperan en el directorio del grupo. Aquí recuperas el acceso de empresas contratistas.</p>
+          <app-field label="Correo o RUT registrado" for="rc" hint="Por seguridad no confirmamos si la cuenta existe.">
+            <input id="rc" name="rc" type="text" appRegla="required|min:7" placeholder="correo@empresa.cl o 76.123.456-K" [(ngModel)]="d.rc">
+          </app-field>
+        }
+        @case (1) {
+          <h2>Paso 2 de 3 · Revisa tu correo</h2>
+          <p class="muted">Si la cuenta existe, enviamos un código de 6 dígitos. Vence en 10 minutos.</p>
+          <app-banner tipo="info">Código de demostración: <strong>482913</strong></app-banner>
+          <app-field label="Código recibido" for="cd">
+            <input id="cd" name="cd" type="text" inputmode="numeric" appRegla="required|code6" placeholder="000000" [(ngModel)]="d.cd">
+          </app-field>
+        }
+        @case (2) {
+          <h2>Paso 3 de 3 · Crea tu nueva contraseña</h2>
+          <app-field label="Nueva contraseña" for="pw" hint="Mínimo 10 caracteres con mayúscula, número y símbolo.">
+            <input id="pw" name="pw" type="password" appRegla="required|pwd" autocomplete="new-password" [(ngModel)]="d.pw">
+          </app-field>
+          <app-strength [valor]="d.pw" />
+          <app-field label="Repite la contraseña" for="pw2">
+            <input id="pw2" name="pw2" type="password" appRegla="required" autocomplete="new-password" [(ngModel)]="d.pw2">
+          </app-field>
+          @if (noCoincide()) { <p class="err-m -mt-3" role="alert">Los valores no coinciden.</p> }
+        }
+      }
+      <div class="flex justify-between flex-wrap gap-3 mt-4">
+        <button type="button" class="btn btn-sec" [disabled]="paso() === 0" (click)="atras()"><app-icon name="chL" /> Atrás</button>
+        <button type="submit" class="btn">{{ paso() === 2 ? 'Guardar y volver a ingresar' : 'Continuar' }} <app-icon [name]="paso() === 2 ? 'check' : 'chR'" /></button>
+      </div>
+    </form>
+  </div>
+  <p class="text-sm mt-4"><a routerLink="/login">← Volver a ingresar</a></p>
+</section>

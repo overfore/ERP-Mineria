@@ -1,0 +1,51 @@
+<app-page-header titulo="Administración" sub="Personas usuarias, roles y permisos, parametrización y consulta de auditoría.">
+  <button type="button" class="btn" (click)="abrirInvitacion()"><app-icon name="plus" /> Invitar usuario</button>
+</app-page-header>
+<app-admin-nav />
+<app-banner tipo="info">Identidades <strong>federadas con el directorio corporativo</strong> (sincronizado hace 12 min). Segundo factor obligatorio, cero credenciales compartidas y registro completo de accesos. El personal de terreno usa credencial y PIN.</app-banner>
+
+<app-data-table [rows]="usuarios()" [cols]="cols" [filtros]="filtros" caption="Personas usuarias" buscarPh="Buscar por nombre, correo o rol…" [buscarEn]="['nombre', 'correo', 'rolL']"
+  [masivas]="[{ id: 'mfa', label: 'Forzar segundo factor' }, { id: 'off', label: 'Desactivar' }]" (masiva)="masiva($event)">
+  <ng-template appCell="nombre" let-r><strong>{{ r.nombre }}</strong><br><span class="text-[13px] muted">{{ r.correo }}</span></ng-template>
+  <ng-template appCell="mfa" let-r><app-estado [v]="r.mfa" [tipo]="r.mfa === 'Activo' ? 'ok' : 'warn'" /></ng-template>
+  <ng-template appCell="estado" let-r><app-estado [v]="r.estado" /></ng-template>
+  <ng-template appCell="acceso" let-r>{{ fdt(r.acceso) }}</ng-template>
+  <ng-template appCell="acc" let-r>
+    <app-menu etiqueta="Más acciones">
+      <span boton><app-icon name="dots" /></span>
+      <button role="menuitem" type="button" class="menu-item" (click)="abrirRol(r)">Cambiar rol</button>
+      <button role="menuitem" type="button" class="menu-item" (click)="restableciendo = r">Restablecer segundo factor</button>
+      <button role="menuitem" type="button" class="menu-item" (click)="bloqueando = r">{{ r.estado === 'Bloqueado' ? 'Desbloquear' : 'Bloquear' }}</button>
+    </app-menu>
+  </ng-template>
+</app-data-table>
+
+<app-modal titulo="Invitar usuario" [(abierto)]="invitar">
+  <div class="field" [class.invalid]="errCorreo()"><label for="iu">Correo corporativo <span class="text-error" aria-hidden="true">*</span></label>
+    <input id="iu" type="email" placeholder="nombre@aranda.example" [(ngModel)]="correo" aria-required="true">
+    @if (errCorreo()) { <div class="err-m" role="alert">{{ errCorreo() }}</div> }</div>
+  <div class="field"><label for="ir">Rol</label><select id="ir" [(ngModel)]="rolInvitado">@for (r of roles; track r[0]) { <option [value]="r[0]">{{ r[1].label }}</option> }</select></div>
+  <label class="check"><input type="checkbox" checked disabled> Segundo factor obligatorio</label>
+  <div pie><button type="button" class="btn btn-sec" (click)="invitar = false">Cancelar</button><button type="button" class="btn" (click)="enviarInvitacion()">Enviar invitación</button></div>
+</app-modal>
+
+<app-modal [titulo]="'Cambiar rol · ' + (cambiandoRol?.nombre || '')" [abierto]="!!cambiandoRol" (abiertoChange)="$event || (cambiandoRol = null)">
+  <div class="field"><label for="nrl">Nuevo rol</label><select id="nrl" [(ngModel)]="nuevoRol">@for (r of roles; track r[0]) { <option [value]="r[0]">{{ r[1].label }}</option> }</select></div>
+  <div pie><button type="button" class="btn btn-sec" (click)="cambiandoRol = null">Cancelar</button><button type="button" class="btn" (click)="guardarRol()">Guardar</button></div>
+</app-modal>
+
+<app-modal titulo="Restablecer segundo factor" [abierto]="!!restableciendo" (abiertoChange)="$event || (restableciendo = null)">
+  <p>La persona deberá volver a registrar su segundo factor en el próximo ingreso.</p>
+  <div pie><button type="button" class="btn btn-sec" (click)="restableciendo = null">Cancelar</button><button type="button" class="btn" (click)="restablecer()">Restablecer</button></div>
+</app-modal>
+
+<app-modal [titulo]="bloqueando?.estado === 'Bloqueado' ? 'Desbloquear cuenta' : 'Bloquear cuenta'" [abierto]="!!bloqueando" (abiertoChange)="$event || (bloqueando = null)">
+  <p>{{ bloqueando?.nombre }}: {{ bloqueando?.estado === 'Bloqueado' ? 'recuperará el acceso.' : 'perderá el acceso: sesiones revocadas, dispositivo bloqueado en 15 minutos o menos y credencial revocada en 24 horas o menos.' }}</p>
+  <div pie><button type="button" class="btn btn-sec" (click)="bloqueando = null">Cancelar</button>
+    <button type="button" class="btn" [class.btn-danger]="bloqueando?.estado !== 'Bloqueado'" (click)="bloquear()">Confirmar</button></div>
+</app-modal>
+
+<app-modal titulo="Desactivar usuarios" [abierto]="desactivando.length > 0" (abiertoChange)="$event || (desactivando = [])">
+  <p>Vas a desactivar {{ desactivando.length }} cuenta{{ desactivando.length > 1 ? 's' : '' }}. Pierden el acceso: el dispositivo se bloquea en 15 minutos o menos y la credencial se revoca en 24 horas o menos. Durante un corte la baja no se propaga hasta que vuelve el enlace.</p>
+  <div pie><button type="button" class="btn btn-sec" (click)="desactivando = []">Cancelar</button><button type="button" class="btn btn-danger" (click)="desactivar()">Desactivar</button></div>
+</app-modal>

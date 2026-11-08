@@ -1,0 +1,55 @@
+<app-page-header titulo="Plan minero y versiones" sub="Cada cambio del plan queda versionado con su motivo. El cumplimiento se mide contra la versión efectivamente vigente, al inicio del turno siguiente.">
+  <button type="button" class="btn" (click)="abrir()"><app-icon name="plus" /> Publicar nueva versión</button>
+</app-page-header>
+
+<div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+  <app-kpi lbl="Cumplimiento (versión vigente)" [val]="95" unit="%" dlt="Turno anterior · disponible al iniciar el turno" cls="good" />
+  <app-kpi lbl="Versiones esta semana" [val]="versiones().length" dlt="Antes: cambios por radio y mensajería, sin registro" cls="neu" />
+  <app-kpi lbl="Cumplimiento medido contra el domingo" [val]="70" unit="%" dlt="El mismo turno, medido “a la antigua”" cls="bad" />
+</div>
+
+<div class="mt-4">
+  <app-tabs [items]="tabs" [(activa)]="tab" />
+  @switch (tab()) {
+    @case ('v') { <div class="card"><app-timeline [items]="hitos()" /></div> }
+    @case ('c') {
+      <div class="card">
+        <div [innerHTML]="grafico | html"></div>
+        <div class="flex flex-wrap gap-4 text-[13px] mt-2">
+          <span><i class="inline-block size-3 rounded-sm mr-1.5 align-[-1px] bg-[#1F7A5C]"></i>Contra versión vigente</span>
+          <span><i class="inline-block size-3 rounded-sm mr-1.5 align-[-1px] bg-[#9C4A1F]"></i>Contra plan del domingo (cómo se medía)</span>
+        </div>
+        <p class="text-sm muted mt-2">Comparar contra el plan del domingo castiga a la operación por cambios que el propio plan hizo después. La planificadora replanifica cada mañana con el cumplimiento real del turno anterior.</p>
+      </div>
+    }
+    @case ('p') {
+      <app-data-table [rows]="poligonos" [cols]="cols" [tam]="7" caption="Polígonos planificados" [buscarEn]="['id', 'banco', 'destino']" [filtros]="[{ key: 'destino', label: 'Destino', options: ['Planta', 'Stock baja ley'] }]">
+        <ng-template appCell="id" let-r><strong>{{ r.id }}</strong></ng-template>
+        <ng-template appCell="ley" let-r>{{ nd(r.ley, 2) }}</ng-template>
+        <ng-template appCell="plan" let-r>{{ nf(r.plan) }}</ng-template>
+        <ng-template appCell="real" let-r>{{ nf(r.real) }}</ng-template>
+        <ng-template appCell="cum" let-r>
+          <div class="flex items-center gap-2 justify-end"><div class="bar max-w-20" [class.warn]="r.cum < 90"><i [style.width.%]="min(100, r.cum)"></i></div><span class="tabular-nums">{{ r.cum }} %</span></div>
+        </ng-template>
+      </app-data-table>
+    }
+  }
+</div>
+
+<app-modal titulo="Publicar nueva versión del plan" [(abierto)]="nueva">
+  <div class="field"><label for="vm">Motivo del cambio</label>
+    <select id="vm" [(ngModel)]="motivo">@for (m of motivos; track m) { <option [value]="m">{{ m }}</option> }</select></div>
+  <div class="field" [class.invalid]="err()['vd']"><label for="vd">Descripción <span class="text-error" aria-hidden="true">*</span></label>
+    <textarea id="vd" [(ngModel)]="descripcion" aria-required="true"></textarea>
+    <div class="hint">Se muestra a despacho y supervisores.</div>
+    @if (err()['vd']) { <div class="err-m" role="alert">{{ err()['vd'] }}</div> }</div>
+  <app-field label="Polígono principal afectado" for="vp" ac="polis" (elegido)="poligono = $event" [class.invalid]="err()['vp']">
+    <input id="vp" type="text" autocomplete="off" [(ngModel)]="poligono">
+    @if (err()['vp']) { <div class="err-m" role="alert">{{ err()['vp'] }}</div> }
+  </app-field>
+  <p class="text-sm muted">Al publicar, la versión llega al despacho y a los equipos de terreno sin carga manual.</p>
+  <div pie>
+    <button type="button" class="btn btn-sec" (click)="nueva = false">Cancelar</button>
+    <button type="button" class="btn" (click)="publicar()">Publicar versión</button>
+  </div>
+</app-modal>

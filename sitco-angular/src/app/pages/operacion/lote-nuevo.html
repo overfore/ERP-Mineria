@@ -1,0 +1,127 @@
+<app-page-header titulo="Conformar lote de embarque" sub="Proceso de punta a punta: desde la programación del embarque hasta la emisión de documentos, con el manejo de la excepción más frecuente (arsénico sobre el límite)." />
+
+@if (cerrado()) {
+  <div class="card text-center">
+    <app-icon name="check" class="size-14 text-senal mx-auto" />
+    <h2>Lote E-2026-28 cerrado</h2>
+    <p>Documentos emitidos y trazabilidad completa. SAP registra la facturación con los datos que entrega la plataforma: una sola verdad contable.</p>
+    <div class="flex justify-center flex-wrap gap-3"><a class="btn" routerLink="/trazabilidad/lote/E-2026-26">Ver un lote de ejemplo</a><a class="btn btn-sec" routerLink="/trazabilidad">Volver a lotes</a></div>
+  </div>
+} @else if (emitidos() >= 0) {
+  <div class="card">
+    <h2>Emitiendo documentos de embarque…</h2>
+    <div class="flex items-center gap-3"><div class="bar cu"><i [style.width.%]="emitidos() * 20"></i></div><span class="text-sm">{{ emitidos() * 20 }} %</span></div>
+    <ul class="text-sm pl-5 mt-2">@for (doc of documentos.slice(0, emitidos()); track doc) { <li>✓ {{ doc }}</li> }</ul>
+  </div>
+} @else {
+  <app-stepper [pasos]="pasos" [actual]="paso()" />
+  <form class="card" novalidate (submit)="$event.preventDefault(); continuar()">
+    <h2>Paso {{ paso() + 1 }} de {{ pasos.length }} · {{ titulos[paso()] }}</h2>
+
+    @switch (paso()) {
+      @case (0) {
+        <div class="grid gap-x-4 md:grid-cols-2">
+          <app-field label="Nave" for="nv"><select id="nv" name="nv" [(ngModel)]="d.nv">@for (n of naves; track n) { <option [value]="n">{{ n }}</option> }</select></app-field>
+          <app-field label="Comprador" for="cp"><select id="cp" name="cp" [(ngModel)]="d.cp"><option>Pacific Smelting Co. (Japón)</option><option>Han River Metals (Corea)</option></select></app-field>
+          <app-field label="Toneladas objetivo" for="tn" hint="Un lote típico: 12.000 t."><input id="tn" name="tn" type="number" appRegla="required|gt0" [(ngModel)]="d.tn"></app-field>
+          <app-field label="Fecha de embarque" for="fl"><input id="fl" name="fl" type="date" appRegla="required|future" [(ngModel)]="d.fl"></app-field>
+          <app-field label="Hora de inicio de carga" for="hl"><input id="hl" name="hl" type="time" appRegla="required" [(ngModel)]="d.hl"></app-field>
+        </div>
+      }
+      @case (1) {
+        <p class="muted">Mueve los controles y mira cómo cambian la ley y el arsénico de la mezcla en tiempo real.</p>
+        <div class="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <div>
+            @for (l of acopios; track l.id; let i = $index) {
+              <div class="field">
+                <label [for]="'bl' + i">{{ l.n }} <span class="muted font-normal">· As {{ nd(l.as, 2) }} % · Cu {{ nd(l.cu, 1) }} %</span></label>
+                <div class="flex items-center gap-3">
+                  <input type="range" [id]="'bl' + i" min="0" [max]="l.max" step="100" [value]="mezcla()[i]" (input)="moverMezcla(i, $any($event.target).value)" class="flex-1 min-h-11 accent-cobre">
+                  <output class="tabular-nums min-w-[90px] text-right">{{ nf(mezcla()[i]) }} t</output>
+                </div>
+              </div>
+            }
+          </div>
+          <div class="card-flat" aria-live="polite">
+            <h4>Mezcla resultante</h4>
+            <span class="text-[13px] text-acero font-medium">Total</span>
+            <div class="font-titulo font-bold text-[34px] leading-tight">{{ nf(calc().t) }} <small class="text-base text-acero">t</small></div>
+            <div class="text-sm" [class.muted]="!enRango()">{{ enRango() ? '✓ Dentro de ±2 % del objetivo' : 'Objetivo: ' + nf(objetivo()) + ' t (±2 %)' }}</div>
+            <div class="mt-2">
+              <div class="flex justify-between text-sm"><span>Cu</span><strong>{{ nd(calc().cu, 2) }} %</strong></div>
+              <div class="flex justify-between text-sm"><span>As (límite {{ nd(asLim, 2) }} %)</span><strong [class]="calc().as <= asLim ? 'text-senal' : 'text-error'">{{ nd(calc().as, 3) }} %</strong></div>
+              <div class="bar" [class.err]="calc().as > asLim" role="img" [attr.aria-label]="'Arsénico ' + nd(calc().as, 2) + ' por ciento de un límite de ' + nd(asLim, 2)"><i [style.width.%]="calc().as / (asLim * 1.4) * 100"></i></div>
+            </div>
+            @if (calc().as > asLim) { <app-banner tipo="warn" class="mt-3">Arsénico sobre el límite: pasarás por el manejo de excepciones.</app-banner> }
+          </div>
+        </div>
+      }
+      @case (2) {
+        <fieldset class="border-0 p-0 m-0 mb-4"><legend class="lbl-t mb-1.5">Protocolo de muestreo</legend>
+          <div class="grid gap-2.5 grid-cols-[repeat(auto-fit,minmax(160px,1fr))]">
+            <label class="choice"><input type="radio" name="pm" value="Acordado" [(ngModel)]="d.pm"> Protocolo acordado con el comprador</label>
+            <label class="choice"><input type="radio" name="pm" value="Árbitro" [(ngModel)]="d.pm"> Con laboratorio árbitro</label>
+          </div>
+        </fieldset>
+        <div class="grid gap-x-4 md:grid-cols-2">
+          <app-field label="Fecha de muestreo" for="fm"><input id="fm" name="fm" type="date" appRegla="required" [(ngModel)]="d.fm"></app-field>
+          <app-field label="Laboratorio del vendedor" for="lb"><select id="lb" name="lb" [(ngModel)]="d.lb"><option>Laboratorio del vendedor (Aranda)</option><option>Laboratorio externo certificado</option></select></app-field>
+          <app-field label="Humedad objetivo (%)" for="hm"><input id="hm" name="hm" type="number" appRegla="required|gt0" [(ngModel)]="d.hm"></app-field>
+        </div>
+        <div class="field"><label class="check font-normal!"><input type="checkbox" name="obl" appRegla="required" [(ngModel)]="d.obl"> Muestreo obligatorio en cada punto de transferencia, sin excepciones (la plataforma bloquea el avance sin muestra).</label></div>
+      }
+      @case (3) {
+        <p class="muted">La plataforma cruza automáticamente los datos de todos los sistemas.</p>
+        <ul class="list-none p-0 m-0">
+          @for (t of verificaciones; track t; let i = $index) {
+            <li class="flex items-center gap-3 min-h-13 border-b border-arena-2">
+              @if (i < verificadas()) {
+                <span [class]="i === 1 ? 'text-aviso' : 'text-senal'">{{ i === 1 ? '▲' : '✓' }}</span>
+              } @else if (i === verificadas()) {
+                <span class="inline-block size-[22px] border-[3px] border-acero-l border-t-cobre rounded-full animate-spin"></span>
+              } @else { <span class="inline-block size-[22px]"></span> }
+              <span>{{ t }}</span>
+              <span class="text-[13px] muted ml-auto text-right">{{ i < verificadas() ? (i === 1 ? '2 viajes sin pesaje de a bordo: se usó báscula (regla R-03)' : 'Verificado') : '' }}</span>
+            </li>
+          }
+        </ul>
+        @if (verificadas() >= verificaciones.length) { <app-banner tipo="ok" class="mt-2">Cadena verificada. Una advertencia documentada, ninguna bloqueante.</app-banner> }
+      }
+      @case (4) {
+        @if (calc().as > asLim) {
+          <app-banner tipo="err"><strong>Arsénico proyectado {{ nd(calc().as, 3) }} %</strong> sobre el límite de {{ nd(asLim, 2) }} %. El embarque tendría penalización (el año pasado: 4 de 31 embarques, USD 1,9 millones).</app-banner>
+          <fieldset class="border-0 p-0 m-0 mb-4"><legend class="lbl-t mb-1.5">Decisión</legend>
+            <div class="grid gap-2.5 grid-cols-[repeat(auto-fit,minmax(160px,1fr))]">
+              <label class="choice"><input type="radio" name="ex" value="remix" [(ngModel)]="d.ex"> Volver y ajustar la mezcla</label>
+              <label class="choice"><input type="radio" name="ex" value="just" [(ngModel)]="d.ex"> Continuar con justificación</label>
+            </div>
+          </fieldset>
+          <app-field label="Justificación comercial" for="jx" hint="Obligatoria si continúas. Mínimo 20 caracteres."><textarea id="jx" name="jx" [(ngModel)]="d.jx"></textarea></app-field>
+        } @else {
+          <app-banner tipo="ok">Sin excepciones: arsénico y ley dentro de los límites contractuales.</app-banner>
+        }
+      }
+      @case (5) {
+        <div class="grid gap-4 md:grid-cols-2">
+          <div class="card-flat"><h4>Resumen</h4><p class="text-sm">{{ d.nv }} · {{ d.cp }}<br>{{ nf(calc().t) }} t · Cu {{ nd(calc().cu, 2) }} % · As {{ nd(calc().as, 3) }} %<br>Embarque: {{ d.fl }} {{ d.hl }}</p></div>
+          <div class="card-flat"><h4>Flujo de aprobación</h4>
+            <app-timeline [items]="[{ t: 'Metalurgia', w: 'Mezcla y muestreo', s: 'done' }, { t: 'Comercial', w: 'Tú, ahora', s: 'cur' }, { t: 'Gerencia (solo con excepción)', w: calc().as > asLim ? 'Requerida' : 'No requerida' }]" />
+          </div>
+        </div>
+        <div class="field"><label class="check font-normal!"><input type="checkbox" name="ap" appRegla="required" [(ngModel)]="d.ap"> Confirmo que revisé la mezcla, el muestreo y las excepciones.</label></div>
+      }
+      @case (6) {
+        <p class="muted">SAP emite la facturación y los documentos contables; la plataforma entrega los datos y la cadena de custodia. No hay dos verdades.</p>
+        <app-banner tipo="info">Al finalizar se emiten cinco documentos y el lote pasa a <strong>Embarcado</strong>. La liquidación con el comprador ocurre meses después, con el árbitro si hay discrepancia.</app-banner>
+      }
+    }
+
+    <div class="flex justify-between flex-wrap gap-3 mt-4">
+      <button type="button" class="btn btn-sec" [disabled]="paso() === 0" (click)="atras()"><app-icon name="chL" /> Atrás</button>
+      <div class="flex flex-wrap gap-3">
+        <button type="button" class="btn btn-ter" (click)="guardar()">Guardar borrador</button>
+        <button type="submit" class="btn">{{ paso() === 6 ? 'Emitir documentos y cerrar' : 'Continuar' }} <app-icon [name]="paso() === 6 ? 'check' : 'chR'" /></button>
+      </div>
+    </div>
+  </form>
+}

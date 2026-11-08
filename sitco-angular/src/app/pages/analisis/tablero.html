@@ -1,0 +1,44 @@
+<app-page-header titulo="Tablero analítico" sub="Indicadores principales con filtros por período y categoría. Haz clic en un indicador o en una barra para profundizar hasta el detalle. Los valores son de ejemplo, no resultados medidos.">
+  <button type="button" class="btn" (click)="exportar = true"><app-icon name="dl" /> Exportar informe</button>
+</app-page-header>
+
+<div class="card-flat mb-4">
+  <div class="grid gap-x-4 md:grid-cols-3 items-end">
+    <div class="field"><label for="dp">Período</label>
+      <select id="dp" [value]="periodo()" (change)="cambiarPeriodo($any($event.target).value)">
+        @for (p of periodos; track p.v) { <option [value]="p.v" [selected]="p.v === periodo()">{{ p.l }}</option> }
+      </select></div>
+    <div class="field"><label for="dc">Categoría</label>
+      <select id="dc" [value]="categoria()" (change)="categoria.set($any($event.target).value)">
+        @for (c of cats; track c) { <option [value]="c" [selected]="c === categoria()">{{ c }}</option> }
+      </select></div>
+    <div class="field"><button type="button" class="btn btn-sec" (click)="limpiar()">Limpiar filtros</button></div>
+  </div>
+</div>
+
+<div aria-live="polite">
+  @if (cargando()) { <app-skeleton [n]="1" /> } @else {
+    @if (indicadores().length) {
+      <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        @for (k of indicadores(); track k.k) {
+          <app-kpi [lbl]="k.l" [val]="k.v" [unit]="k.u" [dlt]="k.d" [cls]="k.c" [href]="'/tablero/detalle/' + k.k"><span class="tag mt-1.5 w-max">{{ k.cat }}</span></app-kpi>
+        }
+      </div>
+    } @else {
+      <app-empty titulo="Sin indicadores" mensaje="No hay indicadores para esta categoría." />
+    }
+    <div class="grid gap-4 md:grid-cols-2 mt-4">
+      @for (c of graficos(); track c.t) {
+        <section class="card" [attr.aria-label]="c.t">
+          <div class="flex justify-between items-center gap-3 mb-3"><h3 class="mb-2">{{ c.t }}</h3><app-estado [v]="c.cat" tipo="cu" /></div>
+          <div [innerHTML]="c.svg | html" (click)="profundizar($event)" (keydown)="profundizar($event)"></div>
+          @if (c.ley) {
+            <div class="flex flex-wrap gap-4 text-[13px] mt-2">@for (l of c.ley; track l[0]) { <span><i class="inline-block size-3 rounded-sm mr-1.5 align-[-1px]" [style.background]="l[1]"></i>{{ l[0] }}</span> }</div>
+          }
+        </section>
+      }
+    </div>
+  }
+</div>
+
+<app-export-dialog [(abierto)]="exportar" titulo="Informe del tablero analítico (período y categoría seleccionados)" [csv]="csv" />

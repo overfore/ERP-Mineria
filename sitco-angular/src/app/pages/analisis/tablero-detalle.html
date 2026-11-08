@@ -1,0 +1,29 @@
+@if (d(); as d) {
+  <app-page-header [titulo]="d[0]" sub="Nivel de detalle: período, tendencia y registros que componen el indicador.">
+    <button type="button" class="btn btn-sec" (click)="exportar = true"><app-icon name="dl" /> Exportar</button>
+    <a class="btn" routerLink="/tablero"><app-icon name="chL" /> Volver al tablero</a>
+  </app-page-header>
+
+  <div class="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+    <div class="card"><h3>Tendencia · últimos 30 días</h3><div [innerHTML]="tendencia() | html"></div></div>
+    <app-card titulo="Línea base y meta">
+      <dl class="text-sm grid grid-cols-[auto_1fr] gap-x-3.5 gap-y-1.5 m-0">
+        <dt class="muted">Línea base 2025</dt><dd class="m-0">{{ d[2] ? nd(d[2], 1) + ' ' + d[1] : '—' }}</dd>
+        <dt class="muted">Meta o referencia</dt><dd class="m-0">{{ d[3] ? nd(d[3], 1) + ' ' + d[1] : '—' }}</dd>
+        <dt class="muted">Cómo se mide</dt><dd class="m-0">Desde el sistema, sin planillas</dd>
+      </dl>
+    </app-card>
+  </div>
+
+  <app-card class="mt-4" titulo="Registros que componen el indicador">
+    <app-data-table [rows]="registros()" [cols]="cols" [tam]="6" caption="Registros del indicador" [buscarEn]="['z', 'o', 'id']">
+      <ng-template appCell="f" let-r>{{ fd(r.f) }}</ng-template>
+      <ng-template appCell="v" let-r>{{ nd(r.v, 1) }}</ng-template>
+      <ng-template appCell="e" let-r>@if (r.v >= r.m) { <app-estado v="Cumple" /> } @else { <app-estado v="Bajo la meta" tipo="warn" /> }</ng-template>
+    </app-data-table>
+  </app-card>
+
+  <app-export-dialog [(abierto)]="exportar" [titulo]="'Detalle del indicador ' + d[0]" />
+} @else {
+  <div class="card"><app-empty titulo="Indicador no encontrado" mensaje="Vuelve al tablero."><a class="btn" routerLink="/tablero">Ir al tablero</a></app-empty></div>
+}

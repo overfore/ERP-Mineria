@@ -1,0 +1,33 @@
+<app-page-header titulo="Administración" sub="Los umbrales y supuestos del negocio son parámetros, no valores escritos en el código." />
+<app-admin-nav />
+
+<form novalidate class="grid gap-4 md:grid-cols-2" (submit)="$event.preventDefault(); revisar()">
+  @for (p of params; track p.k) {
+    <div class="card-flat">
+      <div class="field mb-0!" [class.invalid]="err()[p.k]">
+        <label [for]="'p-' + p.k">{{ p.l }}</label>
+        <div class="flex items-center gap-3">
+          <input type="number" class="max-w-[130px]" [id]="'p-' + p.k" [name]="p.k" [min]="p.min" [max]="p.max" [step]="p.step" [(ngModel)]="valores[p.k]">
+          <span class="muted">{{ p.u }}</span>
+          @if (p.k === 'as') { <app-tip texto="Valor ilustrativo, igual al del Anexo del Subdocumento 13. Se confirma con el contrato de cada comprador." /> }
+        </div>
+        <div class="hint">{{ p.h }} Rango de demostración: {{ p.min }}–{{ p.max }}.</div>
+        @if (err()[p.k]) { <div class="err-m" role="alert">{{ err()[p.k] }}</div> }
+      </div>
+    </div>
+  }
+  <div class="card-flat md:col-span-2">
+    <div class="field" [class.invalid]="err()['motivo']">
+      <label for="pm">Motivo del cambio <span class="text-error" aria-hidden="true">*</span></label>
+      <textarea id="pm" name="pm" [(ngModel)]="motivo" aria-required="true"></textarea>
+      <div class="hint">Queda en la auditoría junto con el valor anterior.</div>
+      @if (err()['motivo']) { <div class="err-m" role="alert">{{ err()['motivo'] }}</div> }
+    </div>
+    <button class="btn" type="submit">Guardar parámetros</button>
+  </div>
+</form>
+
+<app-modal titulo="Guardar parámetros" [(abierto)]="confirmar">
+  <p>Los cambios aplican a toda la plataforma y quedan en la auditoría con su motivo.</p>
+  <div pie><button type="button" class="btn btn-sec" (click)="confirmar = false">Cancelar</button><button type="button" class="btn" (click)="guardar()">Guardar</button></div>
+</app-modal>

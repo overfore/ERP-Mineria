@@ -1,0 +1,39 @@
+<app-page-header titulo="Administración" sub="Control de acceso por roles con matriz de segregación de funciones documentada y verificable." />
+<app-admin-nav />
+
+@if (conflictos().length) {
+  <app-banner tipo="warn"><strong>Conflicto de segregación de funciones</strong>@for (c of conflictos(); track c) { <br>{{ c }} }</app-banner>
+} @else if (cambiado()) {
+  <app-banner tipo="info">Cambios sin guardar. Guardar requiere confirmación y queda auditado.</app-banner>
+} @else if (guardado()) {
+  <app-banner tipo="ok">Permisos guardados.</app-banner>
+}
+
+<div class="relative overflow-x-auto border border-arena-2 rounded-xl bg-white">
+  <table class="stack">
+    <caption class="sr">Matriz de permisos por rol</caption>
+    <thead><tr><th>Permiso</th>@for (r of roles; track r[0]) { <th class="text-center whitespace-normal! min-w-21">{{ r[1].label }}</th> }</tr></thead>
+    <tbody>
+      @for (p of permisos; track p; let i = $index) {
+        <tr>
+          <th scope="row" class="bg-transparent! whitespace-normal!">{{ p }}</th>
+          @for (r of roles; track r[0]) {
+            <td [attr.data-l]="r[1].label" class="text-center">
+              <label class="sr" [for]="'mx-' + r[0] + '-' + i">{{ p }} para {{ r[1].label }}</label>
+              <input type="checkbox" [id]="'mx-' + r[0] + '-' + i" class="size-6 accent-cobre" [checked]="!!mtx()[r[0]][i]" (change)="marcar(r[0], i, $any($event.target).checked)">
+            </td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+<div class="flex flex-wrap gap-3 mt-4">
+  <button type="button" class="btn" [disabled]="!cambiado()" (click)="confirmar = true">Guardar cambios</button>
+  <button type="button" class="btn btn-sec" (click)="descartar()">Descartar</button>
+</div>
+
+<app-modal titulo="Guardar permisos" [(abierto)]="confirmar">
+  <p>Se aplican a las sesiones activas y llegan a terreno cuando hay enlace. Cambio crítico, queda en la auditoría.</p>
+  <div pie><button type="button" class="btn btn-sec" (click)="confirmar = false">Cancelar</button><button type="button" class="btn" (click)="guardar()">Guardar permisos</button></div>
+</app-modal>

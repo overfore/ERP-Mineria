@@ -1,0 +1,19 @@
+<app-page-header titulo="Administración" sub="Registro completo e inalterable de accesos y acciones críticas, con hash de integridad.">
+  <button type="button" class="btn btn-sec" (click)="exportar = true"><app-icon name="dl" /> Exportar</button>
+</app-page-header>
+<app-admin-nav />
+
+<div class="card-flat mb-4">
+  <div class="grid gap-x-4 md:grid-cols-3 items-end">
+    <div class="field"><label for="ad">Desde</label><input id="ad" type="date" [(ngModel)]="desde"></div>
+    <div class="field"><label for="ah">Hasta</label><input id="ah" type="date" [(ngModel)]="hasta"></div>
+    <div class="field"><button type="button" class="btn" (click)="aplicarRango()"><app-icon name="filter" /> Aplicar rango</button></div>
+  </div>
+</div>
+
+<app-data-table [rows]="eventos()" [cols]="cols" [filtros]="filtros" [tam]="10" caption="Registro de auditoría" buscarPh="Buscar usuario o acción…" [buscarEn]="['u', 'a', 'rol', 'ip']">
+  <ng-template appCell="f" let-r>{{ fdt(r.f) }}</ng-template>
+  <ng-template appCell="hash" let-r><code class="text-[13px]">{{ r.hash }}</code></ng-template>
+</app-data-table>
+
+<app-export-dialog [(abierto)]="exportar" titulo="Registro de auditoría" [csv]="csv" />

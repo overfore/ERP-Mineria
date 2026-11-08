@@ -1,0 +1,66 @@
+<div class="grid lg:grid-cols-[1.1fr_1fr] min-h-[calc(100vh-60px)]">
+  <!-- Lado con la imagen corporativa -->
+  <div class="relative overflow-hidden bg-pizarra text-white">
+    <app-hero-pit />
+    <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(21,32,42,.9)_0%,rgba(21,32,42,.8)_50%,rgba(21,32,42,.12)_85%)]"></div>
+    <div class="relative z-10 flex flex-col justify-center gap-4 min-h-full p-6 lg:p-12 [text-shadow:0_1px_3px_rgba(0,0,0,.5)]">
+      <app-brand-lock />
+      <span class="badge w-max bg-white/12! text-white! border-white/30!">Acceso unificado</span>
+      <h1 id="pgh" tabindex="-1" class="text-white!">Un solo ingreso, el mecanismo que le sirve a cada persona</h1>
+      <p class="text-acero-l text-lg">Oficina y Centro Integrado de Operaciones entran con su cuenta corporativa y segundo factor. En terreno, con <strong>credencial de faena y PIN</strong>: sin correo personal, sin teclear contraseñas con guantes.</p>
+      <ul class="text-acero-l pl-5 list-disc">
+        <li>Identidad federada con el directorio del grupo</li>
+        <li>Doble factor obligatorio · sin credenciales compartidas</li>
+        <li>Registro completo de accesos</li>
+      </ul>
+      <p class="mt-6 text-[13px] text-[#C3CDD4] border-t border-white/20 pt-3">Plataforma de trazabilidad, cumplimiento y operación · SITCO Aranda por OVERFORE</p>
+    </div>
+  </div>
+
+  <!-- Formulario -->
+  <div class="grid place-items-center p-4 md:p-6">
+    <div class="card w-full max-w-[480px]">
+      <h2>Iniciar sesión</h2>
+      <app-tabs [items]="tabs" [(activa)]="tab" />
+
+      @if (tab === 'corp') {
+        <form novalidate (ngSubmit)="entrar()">
+          <app-field label="Correo corporativo" for="em" hint="Te redirigiremos al directorio corporativo del grupo.">
+            <input id="em" name="em" type="email" appRegla="required|email" placeholder="nombre@aranda.example" autocomplete="username" [(ngModel)]="correo">
+          </app-field>
+          <app-field label="Perfil de demostración" for="rl" hint="Solo en el prototipo: en producción el perfil lo define el directorio.">
+            <select id="rl" name="rl" [(ngModel)]="perfil">
+              @for (p of perfiles; track p[0]) { <option [value]="p[0]">{{ p[1].label }}</option> }
+            </select>
+          </app-field>
+          <button class="btn btn-lg w-full" type="submit">Continuar con el directorio corporativo <app-icon name="chR" /></button>
+          <div class="flex justify-between flex-wrap gap-2 mt-2"><a routerLink="/recuperar">¿Olvidaste tu acceso?</a><a routerLink="/registro">Soy empresa contratista</a></div>
+        </form>
+      } @else {
+        <form novalidate (submit)="$event.preventDefault()">
+          <p class="text-sm muted">Para supervisión y portería: credencial más PIN. El operador de pala no inicia sesión: usa la botonera.</p>
+          <app-field label="RUT de la credencial" for="rutc">
+            <input id="rutc" name="rutc" type="text" appRegla="required|rut" placeholder="12.345.678-5" [(ngModel)]="rut">
+          </app-field>
+          <div class="lbl-t" id="pin-l">PIN de 4 dígitos <span class="muted text-[13px]">(demostración: 1234)</span></div>
+          <div class="flex gap-3 justify-center my-3" aria-live="polite" [attr.aria-label]="'Dígitos ingresados: ' + pin().length + ' de 4'">
+            @for (k of [0, 1, 2, 3]; track k) { <i class="size-[18px] rounded-full border-2 border-pizarra" [class.bg-pizarra]="k < pin().length"></i> }
+          </div>
+          <div class="text-error text-center font-semibold min-h-[22px]" role="alert">{{ pinError() }}</div>
+          <div class="grid grid-cols-[repeat(3,64px)] md:grid-cols-[repeat(3,72px)] gap-2.5 justify-center" role="group" aria-labelledby="pin-l">
+            @for (n of ['1', '2', '3', '4', '5', '6', '7', '8', '9']; track n) {
+              <button type="button" [class]="claseTecla" [attr.aria-label]="n" (click)="tecla(n)">{{ n }}</button>
+            }
+            <button type="button" [class]="claseTecla + ' text-lg!'" aria-label="Borrar" (click)="tecla('del')">⌫</button>
+            <button type="button" [class]="claseTecla" aria-label="0" (click)="tecla('0')">0</button>
+            <button type="button" [class]="claseTecla + ' bg-cobre! text-white border-cobre-d!'" aria-label="Ingresar" (click)="tecla('ok')">✓</button>
+          </div>
+        </form>
+      }
+    </div>
+  </div>
+</div>
+
+<app-modal titulo="Redirigiendo al directorio corporativo…" [abierto]="redirigiendo()">
+  <div class="flex items-center gap-3"><span class="inline-block size-[22px] border-[3px] border-acero-l border-t-cobre rounded-full animate-spin"></span><span>Autenticando con la identidad federada del grupo.</span></div>
+</app-modal>

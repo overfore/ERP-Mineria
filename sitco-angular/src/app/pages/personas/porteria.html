@@ -1,0 +1,61 @@
+<app-page-header titulo="Consola de portería" sub="Lo que ve el guardia cuando una persona acerca su credencial. La consola consulta la habilitación en el Nodo de Faena, así que sigue funcionando aunque se corte la fibra. No usa reconocimiento facial: queda sujeto al acuerdo con el sindicato.">
+  <app-estado v="Guardia: credencial y PIN al inicio del turno" tipo="dk" />
+</app-page-header>
+
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <app-kpi lbl="Ingresos del turno" [val]="bitacora().length - rechazos()" dlt="Turno día" cls="neu" />
+  <app-kpi lbl="Rechazos del turno" [val]="rechazos()" dlt="Con motivo registrado" [cls]="rechazos() ? 'bad' : 'neu'" />
+  <app-kpi lbl="Rechazos por documento vencido" [val]="porVencido()" dlt="Cada uno con 3 avisos previos · antes, el 14 % de los rechazos llegaba sin aviso" cls="neu" />
+  <app-kpi lbl="Avisos enviados antes de vencer" [val]="avisados" dlt="A 30, 15 y 7 días" cls="neu" />
+</div>
+
+<div class="grid gap-4 md:grid-cols-2 mt-4">
+  <app-card titulo="Lectura de credencial">
+    <p class="text-sm muted">En la faena la persona acerca su credencial al lector. Aquí puedes simularlo con tres casos o buscar a cualquier persona.</p>
+    <div class="grid gap-2 mb-3 grid-cols-[repeat(auto-fit,minmax(170px,1fr))]">
+      <button type="button" class="btn btn-sec" (click)="leer('ok')"><app-icon name="check" /> Persona habilitada</button>
+      <button type="button" class="btn btn-sec" (click)="leer('warn')"><app-icon name="clock" /> Documento por vencer</button>
+      <button type="button" class="btn btn-sec" (click)="leer('err')"><app-icon name="alert" /> Documento vencido</button>
+    </div>
+    <form (submit)="$event.preventDefault(); leer('q')">
+      <app-field label="Buscar persona (nombre o RUT)" for="pt-q" ac="trab" (elegido)="busqueda = $event">
+        <input id="pt-q" type="text" autocomplete="off" placeholder="Escribe un nombre…" [value]="busqueda" (input)="busqueda = $any($event.target).value">
+      </app-field>
+      <button type="submit" class="btn"><app-icon name="badge" /> Validar</button>
+    </form>
+  </app-card>
+
+  <section class="card" aria-live="polite">
+    @if (lectura(); as l) {
+      <div class="flex gap-4 items-center p-4 rounded-xl border-2 mb-3" role="status"
+        [class]="l.tipo === 'ok' ? 'bg-senal-l border-senal text-[#0F5C42]' : l.tipo === 'warn' ? 'bg-aviso-l border-[#EBCB85] text-[#4a2f00]' : 'bg-error-l border-error text-[#6b1111]'">
+        <app-icon [name]="l.tipo === 'ok' ? 'check' : 'alert'" class="size-11" />
+        <div class="flex-1 min-w-0">
+          <div class="font-titulo font-bold text-[26px] leading-tight mb-1">{{ l.titulo }}</div>
+          <div class="text-sm"><strong>{{ l.t.nombre }}</strong> · {{ l.t.rut }}<br>{{ l.t.cargo }} · {{ l.t.empresa }}</div>
+        </div>
+      </div>
+      @switch (l.caso) {
+        @case ('vencido') {
+          <p><strong>{{ l.doc }}</strong> venció el {{ l.vence }}.</p>
+          <p class="text-sm">El sistema avisó a la persona, a {{ l.t.empresa }} y a Seguridad el {{ l.avisos[0] }}, el {{ l.avisos[1] }} y el {{ l.avisos[2] }}. Por eso este rechazo no debería ocurrir: la empresa tuvo 30 días para renovar.</p>
+          <div class="flex flex-wrap gap-3 mt-2"><a class="btn btn-sec" [routerLink]="['/acreditacion', l.t.id]">Ver ficha</a><button type="button" class="btn btn-ter" (click)="avisarSeguridad()">Avisar a Seguridad</button></div>
+        }
+        @case ('revision') { <p class="text-sm">La persona aún no está habilitada. Seguridad revisa sus documentos; no puede ingresar hasta que se apruebe.</p> }
+        @case ('porvencer') { <p class="text-sm"><strong>Aviso:</strong> {{ l.doc }} vence el {{ l.vence }} (en {{ l.dias }} días). Ya se avisó a la persona, a su empleador y a Seguridad.</p> }
+        @default { <p class="text-sm">Todos sus documentos están vigentes.</p> }
+      }
+    } @else {
+      <app-empty titulo="Esperando credencial" mensaje="Acerca una credencial al lector o usa uno de los casos de ejemplo." />
+    }
+  </section>
+</div>
+
+<app-card class="mt-4" titulo="Bitácora del turno" sub="Cada ingreso y cada rechazo queda registrado con su motivo y vuelve al sistema de acceso existente, que se amplía con la habilitación de SITCO.">
+  <app-data-table [rows]="bitacora()" [cols]="cols" [tam]="6" caption="Ingresos y rechazos del turno" buscarPh="Buscar persona o empresa…" [buscarEn]="['nombre', 'empresa', 'motivo']"
+    [filtros]="[{ key: 'res', label: 'Resultado', options: ['Ingresó', 'Rechazado'] }]">
+    <ng-template appCell="f" let-r>{{ ft(r.f) }}</ng-template>
+    <ng-template appCell="nombre" let-r><strong>{{ r.nombre }}</strong></ng-template>
+    <ng-template appCell="res" let-r><app-estado [v]="r.res" [tipo]="r.res === 'Ingresó' ? 'ok' : 'err'" /></ng-template>
+  </app-data-table>
+</app-card>

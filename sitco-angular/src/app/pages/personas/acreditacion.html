@@ -1,0 +1,94 @@
+<app-page-header [titulo]="propia() ? 'Acreditación de mi empresa' : 'Acreditación de personas'" sub="Ninguna persona debería viajar a faena para que le nieguen el ingreso por un documento vencido que el sistema pudo advertir.">
+  <a class="btn" routerLink="/acreditacion/nueva"><app-icon name="plus" /> Nueva acreditación</a>
+</app-page-header>
+
+@if (porVencer()) {
+  <app-banner tipo="warn"><strong>{{ porVencer() }} persona{{ porVencer() > 1 ? 's' : '' }} con documentos por vencer en 30 días.</strong> Ya se notificó a cada persona, a su empleador y a Seguridad. Antes: el 14 % de los rechazos en portería eran por esto.</app-banner>
+}
+
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <app-kpi lbl="Habilitadas" [val]="habilitados()" [unit]="'de ' + lista().length" cls="good" />
+  <app-kpi lbl="Por vencer (30 d)" [val]="porVencer()" dlt="Notificadas" cls="bad" />
+  <app-kpi lbl="Con documentos vencidos" [val]="vencidos()" dlt="No pueden ingresar" cls="bad" />
+  <app-kpi lbl="Acreditación promedio" [val]="38" unit="h" dlt="Línea base: 9 días · meta < 48 h" cls="good" />
+</div>
+
+<div class="mt-4">
+  <app-tabs [items]="tabs" [(activa)]="tab" />
+  @switch (tab()) {
+    @case ('p') {
+      <app-data-table [rows]="lista()" [cols]="cols" [filtros]="filtros()" caption="Personas acreditadas" buscarPh="Buscar por nombre, RUT, empresa o cargo…"
+        [buscarEn]="['nombre', 'rut', 'empresa', 'cargo']" [masivas]="[{ id: 'rec', label: 'Enviar recordatorio' }, { id: 'csv', label: 'Exportar' }]" (masiva)="masiva($event)">
+        <ng-template appCell="nombre" let-r><a [routerLink]="['/acreditacion', r.id]"><strong>{{ r.nombre }}</strong></a><br><span class="text-[13px] muted">{{ r.rut }}</span></ng-template>
+        <ng-template appCell="min" let-r><app-estado [v]="diasTxt(r.min)" [tipo]="diasTipo(r.min)" /></ng-template>
+        <ng-template appCell="estado" let-r><app-estado [v]="r.estado" /></ng-template>
+        <ng-template appCell="acc" let-r>
+          <app-menu etiqueta="Más acciones">
+            <span boton><app-icon name="dots" /></span>
+            <a role="menuitem" class="menu-item" [routerLink]="['/acreditacion', r.id]">Ver ficha</a>
+            <button role="menuitem" type="button" class="menu-item" (click)="recordar(r)">Enviar recordatorio</button>
+            <button role="menuitem" type="button" class="menu-item" (click)="suspendiendo = r">Suspender acceso</button>
+          </app-menu>
+        </ng-template>
+      </app-data-table>
+    }
+    @case ('s') {
+      <div class="flex flex-col gap-3">
+        @for (s of solicitudes(); track s.id) {
+          <div class="card">
+            <div class="flex justify-between items-center flex-wrap gap-3">
+              <div><strong>{{ s.id }} · {{ s.nombre }}</strong><div class="text-sm muted">{{ s.empresa }} · {{ s.cargo }}</div></div>
+              <app-estado [v]="s.hrs + ' h de 48 h'" [tipo]="plazo(s.hrs)" />
+            </div>
+            <div class="mt-2"><app-stepper [pasos]="etapas" [actual]="s.etapa" /></div>
+            <div class="flex justify-between items-center flex-wrap gap-3">
+              <div class="bar max-w-[260px]" [class.err]="s.hrs > 40" [class.warn]="s.hrs > 30 && s.hrs <= 40" role="progressbar" aria-valuemin="0" aria-valuemax="48" [attr.aria-valuenow]="s.hrs" aria-label="Tiempo de acreditación consumido"><i [style.width.%]="s.hrs / 48 * 100"></i></div>
+              @if (propia()) { <span class="text-sm muted">En revisión por Seguridad</span> }
+              @else {
+                <div class="flex gap-3">
+                  <button type="button" class="btn btn-sm btn-danger" (click)="abrirRechazo(s)">Rechazar</button>
+                  <button type="button" class="btn btn-sm" (click)="avanzar(s)">{{ s.etapa >= 2 ? 'Aprobar y emitir credencial' : 'Avanzar etapa' }}</button>
+                </div>
+              }
+            </div>
+          </div>
+        } @empty {
+          <div class="card"><app-empty titulo="Sin solicitudes en curso" mensaje="Todas las solicitudes fueron resueltas dentro del plazo de 48 horas." /></div>
+        }
+      </div>
+    }
+    @case ('a') {
+      <div class="card">
+        <p class="muted text-sm">Se avisa a la persona, a su empleador y a Seguridad con 30, 15 y 7 días de anticipación (parámetros editables en Administración).</p>
+        <ul class="list-none p-0 m-0">
+          @for (x of alertas(); track x.t.id) {
+            <li class="flex justify-between items-center flex-wrap gap-2.5 border-b border-arena-2 py-2.5">
+              <span><a [routerLink]="['/acreditacion', x.t.id]"><strong>{{ x.t.nombre }}</strong></a><br><span class="text-sm muted">{{ x.t.empresa }} · {{ x.d.d }}</span></span>
+              <app-estado [v]="diasTxt(x.d.dias)" [tipo]="diasTipo(x.d.dias)" />
+              <button type="button" class="btn btn-sm btn-sec" (click)="recordar(x.t)"><app-icon name="mail" /> Recordar</button>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  }
+</div>
+
+<app-modal titulo="Aprobar acreditación" [abierto]="!!aprobando" (abiertoChange)="$event || (aprobando = null)">
+  <p>Vas a aprobar a <strong>{{ aprobando?.nombre }}</strong> ({{ aprobando?.empresa }}) y emitir su credencial. Acción crítica: queda auditada.</p>
+  <div pie><button type="button" class="btn btn-sec" (click)="aprobando = null">Cancelar</button><button type="button" class="btn" (click)="aprobar()">Aprobar y emitir</button></div>
+</app-modal>
+
+<app-modal [titulo]="'Rechazar ' + (rechazando?.id || '')" [abierto]="!!rechazando" (abiertoChange)="$event || (rechazando = null)">
+  <p>Se avisará a la empresa con el motivo para que corrija sin viajar a faena.</p>
+  <div class="field"><label for="rj">Motivo del rechazo</label><select id="rj" [(ngModel)]="motivo">@for (m of motivos; track m) { <option [value]="m">{{ m }}</option> }</select></div>
+  <div class="field" [class.invalid]="errComentario()"><label for="rjc">Comentario para la empresa <span class="text-error" aria-hidden="true">*</span></label>
+    <textarea id="rjc" [(ngModel)]="comentario" aria-required="true"></textarea>
+    @if (errComentario()) { <div class="err-m" role="alert">{{ errComentario() }}</div> }</div>
+  <div pie><button type="button" class="btn btn-sec" (click)="rechazando = null">Cancelar</button><button type="button" class="btn btn-danger" (click)="rechazar()">Rechazar solicitud</button></div>
+</app-modal>
+
+<app-modal titulo="Suspender acceso" [abierto]="!!suspendiendo" (abiertoChange)="$event || (suspendiendo = null)">
+  <p>¿Suspender el acceso a faena de <strong>{{ suspendiendo?.nombre }}</strong>? Portería lo verá al instante.</p>
+  <div pie><button type="button" class="btn btn-sec" (click)="suspendiendo = null">Cancelar</button><button type="button" class="btn btn-danger" (click)="suspender()">Suspender acceso</button></div>
+</app-modal>

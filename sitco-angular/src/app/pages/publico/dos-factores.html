@@ -1,0 +1,37 @@
+<section class="max-w-[480px] mx-auto my-8 px-4">
+  <div class="card md:px-8! md:py-6!">
+    @if (!ses.pendiente) {
+      <app-empty titulo="Sesión de acceso no iniciada" mensaje="Vuelve a la pantalla de ingreso.">
+        <a class="btn" routerLink="/login">Ir a ingresar</a>
+      </app-empty>
+    } @else {
+      <h1 id="pgh" tabindex="-1" class="text-[28px]!">Verificación en dos pasos</h1>
+      @if (ses.pendiente.kind === 'cred') {
+        <p>Acerca tu <strong>credencial de faena</strong> al lector del equipo. No necesitas escribir nada.</p>
+        <div class="text-center p-5">
+          <div class="size-30 rounded-full border-[5px] border-dashed border-cobre mx-auto grid place-items-center text-cobre"><app-icon name="badge" class="size-14" /></div>
+        </div>
+        <button type="button" class="btn btn-lg w-full" (click)="leerCredencial()"><app-icon name="zap" /> Simular lectura de credencial</button>
+      } @else {
+        <p>Ingresa el código de 6 dígitos de tu aplicación autenticadora. <span class="muted text-sm">(Demostración: <strong>123456</strong>)</span></p>
+        <form novalidate (submit)="$event.preventDefault(); verificar()">
+          <div class="flex gap-2.5 justify-center" role="group" aria-label="Código de 6 dígitos">
+            @for (i of digitos; track i) {
+              <input #dig type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" [attr.aria-label]="'Dígito ' + (i + 1)"
+                class="w-11! h-14! md:w-[52px]! md:h-15! text-center font-titulo font-bold text-[26px]! p-0!"
+                (input)="escribir(i)" (keydown)="borrar(i, $event)" (paste)="pegar($event)">
+            }
+          </div>
+          <div role="alert" class="text-center text-error font-semibold min-h-7 mt-2">{{ error() }}</div>
+          <button class="btn btn-lg w-full" type="submit">Verificar</button>
+        </form>
+        <div class="flex justify-between items-center flex-wrap gap-2 mt-4 text-sm">
+          @if (segundos() > 0) { <span>El código vence en <strong>{{ segundos() }}</strong> s</span> }
+          @else { <span class="text-aviso">El código venció. Solicita otro.</span> }
+          <button type="button" class="link-btn" (click)="reenviar()">Enviar otro código</button>
+        </div>
+      }
+      <p class="text-sm muted mt-4"><a routerLink="/login">← Volver</a></p>
+    }
+  </div>
+</section>

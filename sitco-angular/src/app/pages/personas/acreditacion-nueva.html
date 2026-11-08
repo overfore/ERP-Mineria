@@ -1,0 +1,61 @@
+<app-page-header titulo="Nueva solicitud de acreditación" sub="Una solicitud completa se resuelve en menos de 48 horas. Los documentos se validan al subirlos." />
+
+@if (enviada()) {
+  <div class="card text-center">
+    <app-icon name="check" class="size-14 text-senal mx-auto" />
+    <h2>Solicitud {{ enviada() }} enviada</h2>
+    <p>{{ d.pn }} quedará acreditado dentro de <strong>48 horas</strong> si los documentos están en regla. Se avisará por correo a {{ d.emp }}.</p>
+    <div class="flex justify-center"><a class="btn" routerLink="/acreditacion">Ver solicitudes</a></div>
+  </div>
+} @else {
+  <app-stepper [pasos]="pasos" [actual]="paso()" />
+  <form class="card" novalidate (submit)="$event.preventDefault(); continuar()">
+    <h2>Paso {{ paso() + 1 }} de {{ pasos.length }} · {{ titulos[paso()] }}</h2>
+    @switch (paso()) {
+      @case (0) {
+        <div class="grid gap-x-4 md:grid-cols-2">
+          <app-field label="Nombre completo" for="pn"><input id="pn" name="pn" type="text" appRegla="required|min:5" [(ngModel)]="d.pn"></app-field>
+          <app-field label="RUT" for="pr"><input id="pr" name="pr" type="text" appRegla="required|rut" placeholder="12.345.678-5" [(ngModel)]="d.pr"></app-field>
+          <app-field label="Teléfono" for="pt"><input id="pt" name="pt" type="tel" appRegla="required|tel" [(ngModel)]="d.pt"></app-field>
+          <app-field label="Fecha de nacimiento" for="pf"><input id="pf" name="pf" type="date" appRegla="required" [(ngModel)]="d.pf"></app-field>
+        </div>
+      }
+      @case (1) {
+        <div class="grid gap-x-4 md:grid-cols-2">
+          @if (propia()) {
+            <app-field label="Empresa" for="emp" hint="Tu empresa (no editable)."><input id="emp" name="emp" type="text" readonly [(ngModel)]="d.emp"></app-field>
+          } @else {
+            <app-field label="Empresa" for="emp" ac="empresas" hint="Escribe para autocompletar." (elegido)="d.emp = $event"><input id="emp" name="emp" type="text" autocomplete="off" appRegla="required" [(ngModel)]="d.emp"></app-field>
+          }
+          <app-field label="Cargo" for="car" ac="cargos" (elegido)="d.car = $event"><input id="car" name="car" type="text" autocomplete="off" appRegla="required" [(ngModel)]="d.car"></app-field>
+          <app-field label="Fecha de ingreso a faena" for="fi"><input id="fi" name="fi" type="date" appRegla="required|future" [(ngModel)]="d.fi"></app-field>
+        </div>
+        <fieldset class="border-0 p-0 m-0"><legend class="lbl-t mb-1.5">Turno</legend>
+          <div class="grid gap-2.5 grid-cols-[repeat(auto-fit,minmax(160px,1fr))]">
+            <label class="choice"><input type="radio" name="tu" value="7x7 A" [(ngModel)]="d.tu"> 7x7 · Grupo A</label>
+            <label class="choice"><input type="radio" name="tu" value="7x7 B" [(ngModel)]="d.tu"> 7x7 · Grupo B</label>
+            <label class="choice"><input type="radio" name="tu" value="Detención" [(ngModel)]="d.tu"> Detención mayor</label>
+          </div>
+        </fieldset>
+      }
+      @case (2) {
+        <p class="muted">Se leen las fechas de vencimiento y se avisará antes de que caduquen.</p>
+        <div class="grid gap-4 md:grid-cols-2">
+          @for (x of docs; track x) { <app-file-drop [etiqueta]="x" (subido)="cargados.set(cargados() + 1)" (quitado)="cargados.set(cargados() - 1)" /> }
+          <div><button class="btn btn-sec" type="button" (click)="ejemplos()"><app-icon name="upload" /> Usar archivos de ejemplo</button></div>
+        </div>
+      }
+      @case (3) {
+        <div class="card-flat"><p class="mb-0"><strong>{{ d.pn }}</strong> · {{ d.pr }}<br>{{ d.emp }} · {{ d.car }} · turno {{ d.tu }}<br>Ingreso: {{ d.fi }}</p></div>
+        <div class="field mt-3"><label class="check font-normal!"><input type="checkbox" name="c1" appRegla="required" [(ngModel)]="d.c1"> Declaro que los documentos son vigentes y fidedignos.</label></div>
+      }
+    }
+    <div class="flex justify-between flex-wrap gap-3 mt-4">
+      <button type="button" class="btn btn-sec" [disabled]="paso() === 0" (click)="atras()"><app-icon name="chL" /> Atrás</button>
+      <div class="flex flex-wrap gap-3">
+        <button type="button" class="btn btn-ter" (click)="guardar()">Guardar borrador</button>
+        <button type="submit" class="btn">{{ paso() === 3 ? 'Enviar solicitud' : 'Continuar' }} <app-icon [name]="paso() === 3 ? 'check' : 'chR'" /></button>
+      </div>
+    </div>
+  </form>
+}

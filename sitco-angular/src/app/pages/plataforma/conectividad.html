@@ -1,0 +1,72 @@
+<app-page-header titulo="Conectividad y nube" sub="Qué pasa cuando se corta la fibra: la operación sigue en modo local desde el Nodo de Faena y todo se sincroniza solo al volver el enlace. Criterio de aceptación 13: 48 horas.">
+  <app-tip texto="48 horas es lo que la operación debe seguir registrando sin enlace a la nube (criterio de aceptación 13), con sincronización en 4 horas o menos al volver." />
+</app-page-header>
+
+<app-iso-arch class="mt-4" />
+
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 mt-4">
+  @for (k of kpis(); track k.l) { <app-kpi [lbl]="k.l" [val]="k.v" [unit]="k.u" [dlt]="k.dl" [cls]="k.c" /> }
+</div>
+
+<div class="card mt-4">
+  <div class="flex justify-between items-center flex-wrap gap-3 mb-3">
+    <h3 class="mb-2">Arquitectura y flujo de datos (simulado)</h3>
+    <app-estado [v]="sim.link === 'down' ? 'Sin camino a la nube' : 'Por ' + sim.pathName()" [tipo]="sim.link === 'down' ? 'err' : sim.path() === 'Fibra A' ? 'ok' : 'warn'" />
+  </div>
+  <div [innerHTML]="diagrama() | html"></div>
+  <div class="flex flex-wrap gap-4 text-[13px] mt-2">
+    <span><i class="inline-block size-3 rounded-sm mr-1.5 align-[-1px] bg-[#1F7A5C]"></i>Flujo normal</span>
+    <span><i class="inline-block size-3 rounded-sm mr-1.5 align-[-1px] bg-[#A32020]"></i>Corte / sin flujo</span>
+    <span><i class="inline-block size-3 rounded-sm mr-1.5 align-[-1px] bg-[#C58A10]"></i>Respaldo (fibra B o satélite)</span>
+  </div>
+</div>
+
+<div class="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] mt-4">
+  <div class="flex flex-col gap-3">
+    <app-card titulo="Cola de sincronización (equipo → Nodo de Faena → nube)">
+      @if (cola().length) {
+        <div class="overflow-x-auto border border-arena-2 rounded-xl bg-white">
+          <table class="stack text-sm!">
+            <thead><tr><th>Evento</th><th>Detalle</th><th>Origen</th><th>Hora</th><th>Equipo → Nodo → Nube</th></tr></thead>
+            <tbody>
+              @for (e of cola(); track e.id) {
+                <tr>
+                  <td data-l="Evento"><code class="text-[13px]">{{ e.id }}</code></td><td data-l="Detalle">{{ e.label }}</td><td data-l="Origen">{{ e.src }}</td><td data-l="Hora">{{ ft(e.ts) }}</td>
+                  <td data-l="Estado">
+                    <span class="inline-flex gap-1 align-middle" role="img" [attr.aria-label]="tiersLargo[e.tier]">
+                      @for (k of [0, 1, 2]; track k) { <i class="size-2.5 rounded-full border" [class]="e.tier >= k ? 'bg-senal border-senal' : 'bg-acero-l border-acero'"></i> }
+                    </span>
+                    <span class="text-[13px] muted"> {{ tiers[e.tier] }}</span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        @if (lote() > 0) { <p class="text-sm muted mt-2">+ {{ nf(lote()) }} registros adicionales del corte simulado pendientes de sincronizar.</p> }
+      } @else {
+        <app-empty titulo="Sin eventos todavía" mensaje="Registra algo desde la app de terreno o simula un corte de fibra."><a class="btn" routerLink="/terreno">Abrir terreno</a></app-empty>
+      }
+    </app-card>
+    <app-card titulo="Bitácora">
+      <div aria-live="polite">
+        @if (bitacora().length) { <app-timeline [items]="bitacora()" /> } @else { <p class="muted text-sm">Sin novedades.</p> }
+      </div>
+    </app-card>
+  </div>
+  <div class="flex flex-col gap-3">
+    <div class="card"><app-sim-panel /></div>
+    <app-card titulo="Qué sigue y qué se detiene sin enlace (Subdocumento 4)">
+      <div class="overflow-x-auto border border-arena-2 rounded-xl bg-white">
+        <table class="stack text-sm!">
+          <thead><tr><th>Función</th><th>Sin enlace</th><th>Cómo se suple</th></tr></thead>
+          <tbody>
+            @for (r of sinEnlace; track r[0]) {
+              <tr><td data-l="Función">{{ r[0] }}</td><td data-l="Sin enlace"><app-estado [v]="r[1]" [tipo]="r[2]" /></td><td data-l="Cómo se suple" class="text-sm">{{ r[3] }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </app-card>
+  </div>
+</div>

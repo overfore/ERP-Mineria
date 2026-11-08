@@ -1,0 +1,115 @@
+<app-page-header [titulo]="saludo()" [sub]="sub()">
+  <button type="button" class="btn btn-sec" data-tour="widgets" (click)="alternarEdicion()">
+    <app-icon [name]="editar() ? 'check' : 'gear'" /> {{ editar() ? 'Listo' : 'Personalizar' }}
+  </button>
+</app-page-header>
+
+@if (rol() === 'operador') {
+  <app-banner tipo="info">Tu herramienta de trabajo es la botonera de la pala.
+    <a accion class="btn btn-sm ml-auto flex-none" routerLink="/terreno">Ver la botonera</a>
+  </app-banner>
+}
+
+<div class="grid gap-4 md:grid-cols-2">
+  @for (w of lista(); track w.id; let i = $index) {
+    @if (w.on) {
+      <section class="card" [class]="(w.id === 'kpis' ? 'md:col-span-2 ' : '') + (editar() ? 'outline-2 outline-dashed outline-cobre outline-offset-4' : '')"
+        [attr.aria-label]="titulos[w.id]">
+        <div class="flex justify-between items-center gap-3 mb-3">
+          <h3 class="mb-2">{{ titulos[w.id] }}</h3>
+          @if (editar()) {
+            <div class="flex gap-1">
+              <button type="button" class="ibtn" [attr.aria-label]="'Subir ' + titulos[w.id]" (click)="mover(i, -1)"><app-icon name="chU" /></button>
+              <button type="button" class="ibtn" [attr.aria-label]="'Bajar ' + titulos[w.id]" (click)="mover(i, 1)"><app-icon name="chD" /></button>
+              <button type="button" class="ibtn" [attr.aria-label]="'Ocultar ' + titulos[w.id]" (click)="mostrar(w.id, false)"><app-icon name="eye" /></button>
+            </div>
+          }
+        </div>
+
+        @switch (w.id) {
+          @case ('kpis') {
+            <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              @for (k of kpis(); track k[0]) { <app-kpi [lbl]="k[0]" [val]="k[1]" [unit]="k[2]" [dlt]="k[3]" [cls]="k[4]" [href]="k[5]" /> }
+            </div>
+          }
+          @case ('pend') {
+            <ul class="list-none p-0 m-0">
+              @for (p of pendientes(); track p[0]) {
+                <li><a [routerLink]="p[1]" class="flex items-center gap-3 min-h-12 no-underline text-pizarra border-b border-arena-2">
+                  <span class="badge size-3 p-0! rounded-full" [class]="p[2] ? 'badge-' + p[2] : ''"></span>
+                  <span class="flex-1">{{ p[0] }}</span><app-icon name="chR" />
+                </a></li>
+              }
+            </ul>
+          }
+          @case ('plan') {
+            <div [innerHTML]="grafPlan | html"></div>
+            <div class="flex flex-wrap gap-4 text-[13px] mt-2">
+              <span><i class="inline-block size-3 rounded-sm mr-1.5 align-[-1px] bg-[#1F7A5C]"></i>Contra versión vigente</span>
+              <span><i class="inline-block size-3 rounded-sm mr-1.5 align-[-1px] bg-[#9C4A1F]"></i>Contra plan del domingo (antes)</span>
+            </div>
+          }
+          @case ('det') {
+            <ul class="list-none p-0 m-0">
+              @for (e of detenidos; track e.id) {
+                <li class="flex justify-between items-center flex-wrap gap-3 border-b border-arena-2 py-2">
+                  <a [routerLink]="['/equipos', e.id]"><strong>{{ e.id }}</strong></a>
+                  <span class="text-sm muted">{{ e.tipo }} · {{ desde(e.det!.desde) }}</span>
+                  <app-estado [v]="e.det!.causa" [tipo]="e.det!.causa === 'Sin clasificar' ? 'err' : 'warn'" />
+                </li>
+              }
+            </ul>
+            <a class="btn btn-sec btn-sm mt-2" routerLink="/equipos">Ver equipos</a>
+          }
+          @case ('acr') {
+            <div class="flex flex-wrap items-center gap-5">
+              <div class="w-full max-w-[260px]" [innerHTML]="grafAcr | html"></div>
+              <div class="flex-1 text-sm">
+                <p><strong>{{ porVencer }}</strong> personas con documentos por vencer.<br><strong>{{ vencidos }}</strong> con documentos vencidos.</p>
+                <a class="btn btn-sec btn-sm" routerLink="/acreditacion">Revisar</a>
+              </div>
+            </div>
+          }
+          @case ('conc') {
+            <div [innerHTML]="grafConc | html"></div>
+            <p class="text-[13px] muted">Datos de demostración. Línea base 2025: 3,1 a 6,8 %.</p>
+          }
+          @case ('amb') {
+            <ul class="list-none p-0 m-0">
+              @for (c of compromisos; track c.id) {
+                <li class="flex justify-between items-center gap-3 border-b border-arena-2 py-2"><span class="text-sm">{{ c.n }}</span><app-estado [v]="c.ok" /></li>
+              }
+            </ul>
+            <a class="btn btn-sec btn-sm mt-2" routerLink="/ambiental">Ver compromisos</a>
+          }
+          @case ('emb') {
+            <ul class="list-none p-0 m-0">
+              @for (e of embarques; track e.id) {
+                <li class="flex justify-between items-center flex-wrap gap-3 border-b border-arena-2 py-2">
+                  <a [routerLink]="['/trazabilidad/lote', e.id]"><strong>{{ e.id }}</strong></a><span class="text-sm muted">{{ e.nave }}</span><app-estado [v]="e.estado" />
+                </li>
+              }
+            </ul>
+          }
+          @case ('conn') {
+            <div class="flex flex-wrap items-center gap-5">
+              <div class="w-full max-w-[260px]" [innerHTML]="grafConn() | html"></div>
+              <div class="text-sm flex-1"><p><strong>{{ sim.link === 'down' ? 'Modo local activo.' : 'Todo sincronizado.' }}</strong><br>{{ nf(sim.pending()) }} registros pendientes.</p></div>
+            </div>
+            <a class="btn btn-sec btn-sm mt-2" routerLink="/conectividad">Ver arquitectura</a>
+          }
+          @case ('act') { <app-timeline [items]="actividad" /> }
+        }
+      </section>
+    }
+  }
+</div>
+
+@if (editar() && ocultos().length) {
+  <div class="card-flat mt-4">
+    <h4>Componentes ocultos</h4>
+    <div class="flex flex-wrap gap-3">
+      @for (w of ocultos(); track w.id) { <button type="button" class="btn btn-sm btn-sec" (click)="mostrar(w.id, true)"><app-icon name="plus" /> {{ titulos[w.id] }}</button> }
+    </div>
+  </div>
+}

@@ -1,0 +1,79 @@
+<div [class]="ses.user() ? '' : 'px-4 py-8 md:px-6 md:py-12'"><div [class]="ses.user() ? '' : 'max-w-[1180px] mx-auto'">
+  <app-page-header titulo="Arquitectura de información" sub="RT-25.09: mapa del sitio completo, diagrama de navegación, taxonomía y nomenclatura, estructura de menús y jerarquía de la información." />
+  <app-tabs [items]="tabs" [(activa)]="tab" />
+
+  @switch (tab()) {
+    @case ('m') {
+      <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        @for (g of sitemap; track g.g) {
+          <div class="card-flat">
+            <h3 [style.color]="g.c">{{ g.g }}</h3>
+            <ul class="list-none pl-5 border-l-2 border-arena-3 my-1">
+              @for (i of g.items; track i[0]) { <li class="py-0.5"><a class="font-medium" [routerLink]="i[1]">{{ i[0] }}</a></li> }
+            </ul>
+          </div>
+        }
+      </div>
+      <p class="text-sm muted mt-2">{{ totalPantallas }} pantallas navegables. Cualquier función principal queda a tres interacciones o menos desde el inicio (RT-25.01).</p>
+    }
+    @case ('o') {
+      <p class="text-sm muted">Los nueve módulos y el Integrador del Subdocumento 3, con las pantallas del prototipo que muestran cada uno. NODO: también corre en el Nodo de Faena, 48 h sin enlace.</p>
+      <div class="overflow-x-auto border border-arena-2 rounded-xl bg-white">
+        <table class="stack">
+          <caption class="sr">Módulos de la solución y pantallas del prototipo</caption>
+          <thead><tr><th>Módulo</th><th>Grupo</th><th>NODO</th><th>Pantallas del prototipo</th></tr></thead>
+          <tbody>
+            @for (m of modulos; track m.id) {
+              <tr>
+                <td data-l="Módulo"><strong>{{ m.n }}</strong><div class="text-[13px] muted">{{ m.d }}</div></td>
+                <td data-l="Grupo">{{ m.g }}</td>
+                <td data-l="NODO">@if (m.nodo) { <span class="badge badge-dk">NODO</span> } @else { <span class="muted">—</span> }</td>
+                <td data-l="Pantallas">@for (p of m.pantallas; track p!.id; let ultimo = $last) { <a [routerLink]="p!.h">{{ p!.l }}</a>@if (!ultimo) { · } }</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="text-sm muted mt-2">El inicio por perfil, Terceros, Conectividad y nube y Ayuda son transversales: reúnen datos de varios módulos.</p>
+    }
+    @case ('d') {
+      <div class="card">
+        <div [innerHTML]="diagrama | html"></div>
+        <p class="text-sm muted">Línea continua: pantalla principal de cada sección. Línea punteada: pantalla de segundo nivel (detalle, creación o asistente).</p>
+      </div>
+    }
+    @case ('t') {
+      <div class="overflow-x-auto border border-arena-2 rounded-xl bg-white">
+        <table class="stack">
+          <thead><tr><th>Término del prototipo</th><th>Qué significa</th><th>Evitar</th></tr></thead>
+          <tbody>@for (r of taxonomia; track r[0]) { <tr><td data-l="Término"><strong>{{ r[0] }}</strong></td><td data-l="Significado">{{ r[1] }}</td><td data-l="Evitar" class="muted">{{ r[2] }}</td></tr> }</tbody>
+        </table>
+      </div>
+      <p class="text-sm muted mt-2">El vocabulario es el de la industria del cobre y el de las entrevistas de levantamiento: no se inventan nombres propios para cosas que la gente ya llama de otra forma.</p>
+    }
+    @case ('e') {
+      <div class="overflow-x-auto border border-arena-2 rounded-xl bg-white">
+        <table>
+          <caption class="sr">Opciones de menú por perfil</caption>
+          <thead><tr><th>Sección</th>@for (r of roles; track r.label) { <th class="whitespace-normal! min-w-20 text-center">{{ r.label }}</th> }</tr></thead>
+          <tbody>
+            @for (i of secciones; track i.id) {
+              <tr><th scope="row" class="bg-transparent!">{{ i.l }}</th>
+                @for (r of roles; track r.label) {
+                  <td class="text-center">@if (r.items.includes(i.id)) { <span aria-label="Disponible" class="text-senal font-bold">✓</span> } @else { <span aria-label="No disponible" class="muted">—</span> }</td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+    @case ('j') {
+      <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div class="card-flat"><h3>Nivel 1 · Qué necesito hoy</h3><p class="text-sm">Inicio por perfil: indicadores del turno, pendientes y alertas priorizadas. Es lo único que usa el operador: la botonera de cuatro destinos y un toque de credencial por turno.</p></div>
+        <div class="card-flat"><h3>Nivel 2 · Dónde actúo</h3><p class="text-sm">Los módulos de operación, personas y análisis, con listas filtrables, tarjetas y acciones masivas.</p></div>
+        <div class="card-flat"><h3>Nivel 3 · La evidencia</h3><p class="text-sm">Fichas y detalles: cadena de custodia, historial, auditoría y exportación. Siempre a no más de tres interacciones.</p></div>
+      </div>
+    }
+  }
+</div></div>

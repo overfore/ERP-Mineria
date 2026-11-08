@@ -1,0 +1,58 @@
+<app-page-header titulo="Perforación y pozos" sub="Cada pozo queda registrado con su profundidad y su índice de dureza. Las dos perforadoras instrumentadas lo envían solas; las siete sin instrumentación lo registran en la App SITCO Terreno. Geología descarga los pozos desde aquí, sin planillas.">
+  <button type="button" class="btn btn-sec" (click)="descargar(pozos())"><app-icon name="dl" /> Descargar para Geología</button>
+  <button type="button" class="btn" (click)="abrir()"><app-icon name="plus" /> Registrar pozo</button>
+</app-page-header>
+
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <app-kpi lbl="Pozos del turno" [val]="delTurno()" dlt="Turno día · 08:00 a 20:00" cls="neu" />
+  <app-kpi lbl="Perforadoras instrumentadas" [val]="2" unit="de 9" dlt="Las otras 7 registran en la App SITCO Terreno" cls="neu" />
+  <app-kpi lbl="Índice de dureza promedio" [val]="promedio()" dlt="Escala 0 a 100 · valores de ejemplo" cls="neu" />
+  <app-kpi lbl="Pozos sin registro digital" [val]="0" dlt="Antes: libreta y planilla al final del turno" cls="good" />
+</div>
+
+<div class="mt-4">
+  <app-tabs [items]="tabs" [(activa)]="tab" />
+  @switch (tab()) {
+    @case ('p') {
+      <app-data-table [rows]="pozos()" [cols]="cols" [filtros]="filtros" caption="Pozos perforados" buscarPh="Buscar pozo, polígono o perforadora…" [buscarEn]="['id', 'poli', 'pf']"
+        [masivas]="[{ id: 'csv', label: 'Exportar selección' }]" (masiva)="exportarSeleccion($event.ids)">
+        <ng-template appCell="id" let-r><strong>{{ r.id }}</strong></ng-template>
+        <ng-template appCell="prof" let-r>{{ nd(r.prof, 1) }} m</ng-template>
+        <ng-template appCell="dur" let-r>{{ r.dur }} · {{ dureza(r.dur) }}</ng-template>
+        <ng-template appCell="origen" let-r><app-estado [v]="r.origen" [tipo]="r.origen === 'Instrumentada' ? '' : 'cu'" /></ng-template>
+        <ng-template appCell="f" let-r>{{ fdt(r.f) }}</ng-template>
+      </app-data-table>
+    }
+    @case ('d') {
+      <div class="card">
+        <div [innerHTML]="durezaPorPoligono() | html"></div>
+        <p class="text-sm muted">La dureza ayuda a planificar la tronadura y a anticipar el rendimiento en la planta. Valores de ejemplo.</p>
+      </div>
+    }
+    @case ('c') {
+      <div class="grid gap-4 md:grid-cols-2">
+        <div class="card-flat"><h3 class="flex items-center gap-2"><app-icon name="zap" /> Perforadora instrumentada (PF-01 y PF-02)</h3>
+          <p class="text-sm">El equipo mide la profundidad y la energía de perforación. El Integrador recibe el dato y calcula el índice de dureza sin que el operador haga nada.</p></div>
+        <div class="card-flat"><h3 class="flex items-center gap-2"><app-icon name="phone" /> Perforadora sin instrumentación (PF-03 a PF-09)</h3>
+          <p class="text-sm">El operador registra el pozo en la App SITCO Terreno con botones grandes, al terminar cada pozo. Si no hay señal, el registro queda en la tableta y sube solo al Nodo de Faena.</p></div>
+      </div>
+    }
+  }
+</div>
+
+<app-modal titulo="Registrar pozo (App SITCO Terreno)" [(abierto)]="nuevo">
+  <p class="text-sm muted">Así lo registra el operador de una perforadora sin instrumentación. Turno, hora y posición se completan solos.</p>
+  <div class="field"><label for="pz-pf">Perforadora</label><select id="pz-pf" [(ngModel)]="n.pf">@for (p of sinInstrumentar; track p) { <option [value]="p">{{ p }}</option> }</select></div>
+  <app-field label="Polígono" for="pz-po" ac="polis" hint="Empieza a escribir: B30…" (elegido)="n.poli = $event" [class.invalid]="err()['poli']">
+    <input id="pz-po" type="text" autocomplete="off" [(ngModel)]="n.poli">
+    @if (err()['poli']) { <div class="err-m" role="alert">{{ err()['poli'] }}</div> }
+  </app-field>
+  <div class="field" [class.invalid]="err()['prof']"><label for="pz-pr">Profundidad (m) <span class="text-error" aria-hidden="true">*</span></label>
+    <input id="pz-pr" type="number" min="1" max="40" step="0.1" inputmode="decimal" [(ngModel)]="n.prof">
+    @if (err()['prof']) { <div class="err-m" role="alert">{{ err()['prof'] }}</div> }</div>
+  <div class="field"><label for="pz-du">Cómo se sintió el terreno</label>
+    <select id="pz-du" [(ngModel)]="n.dur"><option [ngValue]="45">Blando</option><option [ngValue]="65">Medio</option><option [ngValue]="82">Duro</option></select>
+    <div class="hint">Sin instrumentación, la dureza se estima por la percepción del operador y se ajusta con la tronadura.</div></div>
+  <div class="field"><label for="pz-ag">¿Encontró agua?</label><select id="pz-ag" [(ngModel)]="n.agua"><option>No</option><option>Sí</option></select></div>
+  <div pie><button type="button" class="btn btn-sec" (click)="nuevo = false">Cancelar</button><button type="button" class="btn" (click)="registrar()">Registrar pozo</button></div>
+</app-modal>

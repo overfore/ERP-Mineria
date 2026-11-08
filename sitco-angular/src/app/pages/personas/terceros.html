@@ -1,0 +1,24 @@
+<app-page-header titulo="Gestión de terceros" sub="Directorio de contratistas, compradores, laboratorios, fabricantes y operador portuario, con evaluación e historial.">
+  <button type="button" class="btn" (click)="abrir()"><app-icon name="plus" /> Nuevo tercero</button>
+</app-page-header>
+
+<app-data-table [rows]="terceros()" [cols]="cols" [filtros]="filtros" [tam]="9" caption="Directorio de terceros" buscarPh="Buscar tercero…" [buscarEn]="['nombre', 'rut', 'rubro', 'tipo']">
+  <ng-template appCell="nombre" let-r><a [routerLink]="['/terceros', r.id]"><strong>{{ r.nombre }}</strong></a></ng-template>
+  <ng-template appCell="tipo" let-r><app-estado [v]="r.tipo" tipo="cu" /></ng-template>
+  <ng-template appCell="trabajadores" let-r>{{ r.trabajadores ? nf(r.trabajadores) : '—' }}</ng-template>
+  <ng-template appCell="score" let-r>
+    <div class="flex items-center gap-2 justify-end"><div class="bar max-w-[70px]" [class.warn]="r.score < 70"><i [style.width.%]="r.score"></i></div><span class="tabular-nums">{{ r.score }}</span></div>
+  </ng-template>
+  <ng-template appCell="estado" let-r><app-estado [v]="r.estado" /></ng-template>
+</app-data-table>
+
+<app-modal titulo="Nuevo tercero" [(abierto)]="nuevo">
+  <div class="field" [class.invalid]="err()['nombre']"><label for="nt">Razón social <span class="text-error" aria-hidden="true">*</span></label>
+    <input id="nt" type="text" [(ngModel)]="n.nombre" aria-required="true">
+    @if (err()['nombre']) { <div class="err-m" role="alert">{{ err()['nombre'] }}</div> }</div>
+  <div class="field" [class.invalid]="err()['rut']"><label for="nr">RUT <span class="text-error" aria-hidden="true">*</span></label>
+    <input id="nr" type="text" placeholder="76.123.456-K" [(ngModel)]="n.rut" aria-required="true">
+    @if (err()['rut']) { <div class="err-m" role="alert">{{ err()['rut'] }}</div> }</div>
+  <div class="field"><label for="ntp">Tipo</label><select id="ntp" [(ngModel)]="n.tipo">@for (t of tipos; track t) { <option [value]="t">{{ t }}</option> }</select></div>
+  <div pie><button type="button" class="btn btn-sec" (click)="nuevo = false">Cancelar</button><button type="button" class="btn" (click)="crear()">Crear tercero</button></div>
+</app-modal>

@@ -1,0 +1,110 @@
+@if (e(); as e) {
+  <app-page-header [titulo]="'Lote ' + e.id" [sub]="e.nave + ' · ' + e.comprador + ' · ' + nf(e.t) + ' t · Cu ' + nd(e.cu, 1) + ' % · As ' + nd(e.as, 2) + ' %'">
+    <app-estado [v]="e.estado" />
+    <button type="button" class="btn btn-sec" (click)="exportar = true"><app-icon name="dl" /> Cadena de custodia</button>
+    @if (e.estado === 'Pendiente de aprobación') { <button type="button" class="btn" (click)="pedirAprobacion()"><app-icon name="check" /> Aprobar lote</button> }
+  </app-page-header>
+
+  @if (e.as > asLim) {
+    <app-banner tipo="err">
+      <strong>Excepción: arsénico proyectado {{ nd(e.as, 2) }} %</strong> sobre el límite contractual de {{ nd(asLim, 2) }} % (supuesto parametrizable)<app-tip [inl]="true" [texto]="tipLimite" />. Un embarque así genera penalización. Revisa la mezcla antes de aprobar.
+      <button accion type="button" class="btn btn-sm flex-none" (click)="resolver = true">Resolver excepción</button>
+    </app-banner>
+  } @else {
+    <app-banner tipo="ok">Sin excepciones abiertas. La cadena está verificada de punta a punta.</app-banner>
+  }
+
+  <div class="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+    <div class="flex flex-col gap-3">
+      <app-card titulo="Ciclo del lote · 8 pasos">
+        <app-timeline [items]="ciclo()" />
+        <p class="text-[13px] muted">Medido: dato registrado por un sistema o una persona. Supuesto: estimación con una regla declarada y su versión. Estados: completado, en curso y pendiente. Cada paso conserva la versión del plan, los pesos y los análisis.</p>
+      </app-card>
+
+      <app-card titulo="Reconstrucción de origen">
+        <p class="muted text-sm">Qué polígonos componen este lote, cuándo se extrajeron y por qué stocks pasaron.</p>
+        <button type="button" class="btn" [disabled]="reconstruyendo()" (click)="reconstruir()"><app-icon name="route" /> Reconstruir origen</button>
+        <div class="mt-4" aria-live="polite">
+          @if (reconstruyendo()) { <app-skeleton /> }
+          @if (origen(); as o) {
+            <app-banner tipo="ok">Origen reconstruido con evidencia (ejemplo: <strong>1 min 48 s</strong>). Meta del contrato: menos de 2 horas (hoy: 4 a 6 semanas, con resultado estimado).</app-banner>
+            <div class="grid gap-4 md:grid-cols-2 items-center">
+              <div [innerHTML]="o.dona | html"></div>
+              <div [innerHTML]="o.barras | html"></div>
+            </div>
+            <div class="overflow-x-auto border border-arena-2 rounded-xl bg-white mt-4">
+              <table class="stack">
+                <thead><tr><th>Polígono</th><th>Banco</th><th>Extraído</th><th>Stock</th><th class="text-right">Toneladas</th><th class="text-right">Cu %</th><th class="text-right">As ppm</th></tr></thead>
+                <tbody>
+                  @for (x of o.c; track x.poli.id) {
+                    <tr>
+                      <td data-l="Polígono"><strong>{{ x.poli.id }}</strong></td><td data-l="Banco">{{ x.poli.banco }}</td><td data-l="Extraído">{{ fd(x.fx) }}</td><td data-l="Stock">{{ x.stock }}</td>
+                      <td data-l="Toneladas" class="text-right tabular-nums">{{ nf(x.t) }}</td><td data-l="Cu %" class="text-right tabular-nums">{{ nd(x.poli.ley, 2) }}</td><td data-l="As ppm" class="text-right tabular-nums">{{ nf(x.poli.as) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            <details class="mt-2 border border-arena-2 rounded-lg bg-white">
+              <summary class="min-h-12 px-4 flex items-center font-semibold cursor-pointer">Supuesto declarado: polígonos de borde y stocks</summary>
+              <div class="px-4 pb-4 text-sm">Mientras el Cliente no decida otra cosa, cuando una pala carga en el borde entre dos polígonos todo el tonelaje del viaje se asigna al polígono donde está la pala (supuesto SUP-11). En los stocks se asume el <strong>promedio ponderado por tonelaje</strong> de lo acopiado (supuesto SUP-03) y se muestra la regla usada y cuánto aportó cada polígono. La innovación 3 refina la ley esperada con la composición por capas del stock. Cada etapa indica si el dato fue medido o es un supuesto.</div>
+            </details>
+          }
+        </div>
+      </app-card>
+    </div>
+
+    <div class="flex flex-col gap-3">
+      <app-card titulo="Datos del lote">
+        <dl class="text-sm grid grid-cols-[auto_1fr] gap-x-3.5 gap-y-1.5 m-0">
+          <dt class="muted">Fecha</dt><dd class="m-0">{{ fd(e.fecha) }}</dd>
+          <dt class="muted">Toneladas</dt><dd class="m-0">{{ nf(e.t) }} t</dd>
+          <dt class="muted">Ley Cu</dt><dd class="m-0">{{ nd(e.cu, 1) }} %</dd>
+          <dt class="muted">Arsénico</dt><dd class="m-0">{{ nd(e.as, 2) }} %</dd>
+          <dt class="muted">Laboratorios</dt><dd class="m-0">Vendedor · Comprador · Árbitro</dd>
+          <dt class="muted">Documentos</dt><dd class="m-0">{{ paso() > 8 ? '5 emitidos' : 'Pendientes' }}</dd>
+        </dl>
+      </app-card>
+      <app-card titulo="Evidencia asociada">
+        @for (a of [['Análisis de laboratorio (12)', 'Resultados recibidos del sistema de laboratorio sin transcripción manual, en ambos sentidos.'], ['Pesajes (412 viajes)', 'Peso de a bordo, báscula de control y guía de despacho por camión.'], ['Versiones del plan vigentes', 'v2, v4 y v6: cada carga queda asociada a la versión que regía en ese momento.']]; track a[0]) {
+          <details class="border border-arena-2 rounded-lg bg-white mb-2">
+            <summary class="min-h-12 px-4 flex items-center font-semibold cursor-pointer">{{ a[0] }}</summary>
+            <div class="px-4 pb-4"><p class="text-sm">{{ a[1] }}</p></div>
+          </details>
+        }
+      </app-card>
+    </div>
+  </div>
+
+  <app-export-dialog [(abierto)]="exportar" [titulo]="'Cadena de custodia del lote ' + e.id" />
+
+  <app-modal titulo="Aprobar lote de embarque" [(abierto)]="aprobar">
+    <p>Vas a aprobar el lote <strong>{{ e.id }}</strong> ({{ nf(e.t) }} t). Es una acción crítica: queda registrada en la auditoría y habilita la emisión de documentos de embarque.</p>
+    <div pie>
+      <button type="button" class="btn btn-sec" (click)="aprobar = false">Cancelar</button>
+      <button type="button" class="btn" (click)="confirmarAprobacion()">Sí, aprobar lote</button>
+    </div>
+  </app-modal>
+
+  <app-modal titulo="Resolver excepción de arsénico" [ancho]="true" [(abierto)]="resolver">
+    <p>El lote proyecta <strong>{{ nd(e.as, 2) }} %</strong> de As (límite {{ nd(asLim, 2) }} %). Estas son las opciones del sistema:</p>
+    <label class="choice mb-2"><input type="radio" name="ro" value="remix" [(ngModel)]="opcion">
+      <span><strong>Re-mezclar con Stock A</strong><br><span class="text-sm muted font-normal">Reemplaza 2.400 t del lote L-0415 (As 0,58 %) por L-0412 (As 0,22 %). As proyectado: <strong>0,36 %</strong>. Costo: 1 día de retoma.</span></span></label>
+    <label class="choice"><input type="radio" name="ro" value="just" [(ngModel)]="opcion">
+      <span><strong>Aprobar con justificación comercial</strong><br><span class="text-sm muted font-normal">Requiere segunda aprobación de Comercial y queda marcado para el árbitro.</span></span></label>
+    <div class="field mt-4" [class.invalid]="errJust()">
+      <label for="jt">Justificación (obligatoria si apruebas sobre el límite)</label>
+      <textarea id="jt" name="jt" [(ngModel)]="justificacion"></textarea>
+      <div class="hint">Mínimo 20 caracteres.</div>
+      @if (errJust()) { <div class="err-m" role="alert">{{ errJust() }}</div> }
+    </div>
+    <div pie>
+      <button type="button" class="btn btn-sec" (click)="resolver = false">Cancelar</button>
+      <button type="button" class="btn" (click)="aplicarDecision()">Aplicar decisión</button>
+    </div>
+  </app-modal>
+} @else {
+  <div class="card">
+    <app-empty titulo="Lote no encontrado" mensaje="Revisa el identificador del embarque."><a class="btn" routerLink="/trazabilidad">Volver a lotes</a></app-empty>
+  </div>
+}

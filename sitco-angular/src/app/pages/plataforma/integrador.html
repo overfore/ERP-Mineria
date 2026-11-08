@@ -1,0 +1,37 @@
+<app-page-header titulo="Integrador de sistemas" sub="Un conector por cada sistema existente. La plataforma se integra con lo que la compañía ya tiene: no reemplaza a SAP ni al despacho.">
+  <button type="button" class="btn btn-sec" (click)="probarTodos()"><app-icon name="refresh" /> Probar todos los conectores</button>
+</app-page-header>
+
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <app-kpi lbl="Se integran" [val]="5" unit="sistemas" dlt="SAP, despacho, laboratorio, telemetría y fatiga" cls="neu" />
+  <app-kpi lbl="Solo lectura" [val]="3" unit="sistemas" dlt="Historiador, planificación y báscula" cls="neu" />
+  <app-kpi lbl="Se amplía" [val]="1" unit="sistema" dlt="Acceso de portería" cls="neu" />
+  <app-kpi lbl="Se reemplaza" [val]="1" dlt="Planillas y carpetas" cls="neu" />
+</div>
+
+<div class="mt-4">
+  @if (sim.link === 'down') {
+    <app-banner tipo="warn"><strong>Sin camino a la nube.</strong> Los conectores que corren en el Nodo de Faena (despacho, laboratorio, báscula, fatiga, historiador y portería) siguen trabajando. Los que van a la nube (SAP, telemetría y planificación) dejan sus mensajes en la bandeja de salida y los envían solos, en orden, al volver el enlace.</app-banner>
+  } @else {
+    <app-banner tipo="info">Ninguno de los diez sistemas existentes queda fuera: <strong>cinco se integran</strong>, <strong>tres se leen sin modificarse</strong>, el <strong>acceso de portería se amplía</strong> y las <strong>planillas dejan de ser el sistema de registro</strong>. Prueba cortar las fibras en «Simular nube» y mira cómo cambia el estado de cada conector.</app-banner>
+  }
+</div>
+
+<app-card titulo="Conectores" sub="Estado simulado. En producción cada conector registra sus mensajes con un identificador único, así que un reintento nunca duplica un dato.">
+  <app-data-table [rows]="sistemas()" [cols]="cols" [tam]="10" caption="Conectores con los sistemas existentes" buscarPh="Buscar sistema o módulo…" [buscarEn]="['n', 't', 'mod', 'q']"
+    [filtros]="[{ key: 't', label: 'Tratamiento', options: ['Se integra', 'Solo lectura', 'Se amplía', 'Se reemplaza'] }]">
+    <ng-template appCell="n" let-r><strong>{{ r.n }}</strong><div class="text-[13px] muted">{{ r.q }}</div></ng-template>
+    <ng-template appCell="t" let-r><app-estado [v]="r.t" [tipo]="tratamiento[r.t]" /></ng-template>
+    <ng-template appCell="loc" let-r>{{ r.loc === 'faena' ? 'Nodo de Faena' : r.loc === 'nube' ? 'Nube' : '—' }}</ng-template>
+    <ng-template appCell="est" let-r>@let s = estado(r); <app-estado [v]="s.t" [tipo]="s.k" /></ng-template>
+    <ng-template appCell="acc" let-r>@if (r.lat) { <button type="button" class="btn btn-sm btn-sec" (click)="probar(r)">Probar</button> }</ng-template>
+  </app-data-table>
+</app-card>
+
+<div class="grid gap-4 md:grid-cols-2 mt-4">
+  <app-card titulo="Cómo trabaja un conector"><app-timeline [items]="pasos" /></app-card>
+  <app-card titulo="Mensajes de las últimas 24 horas">
+    <div [innerHTML]="mensajes | html"></div>
+    <p class="text-[13px] muted">Cifras de ejemplo.</p>
+  </app-card>
+</div>
