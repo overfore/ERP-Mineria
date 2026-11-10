@@ -1,0 +1,32 @@
+name: CI
+
+# Se ejecuta en cada push o pull request a la rama "prototipo".
+# Railway (con "Wait for CI" activado) solo publica si este flujo termina en verde.
+on:
+  push:
+    branches: [prototipo]
+  pull_request:
+    branches: [prototipo]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Revisar archivos del prototipo HTML
+        run: test -f index.html && test -d js && test -d css
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: sitco-angular/package-lock.json
+
+      - name: Compilar la versión Angular
+        working-directory: sitco-angular
+        run: |
+          npm ci
+          npm run build
