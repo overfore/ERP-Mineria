@@ -1,8 +1,8 @@
 # SITCO Aranda en Angular
 
-Versión en **Angular 22** con estilos en **Tailwind CSS 4** del prototipo SITCO Aranda. Tiene las mismas 37 pantallas, los mismos datos de demostración y el mismo comportamiento que la versión en HTML de la raíz del repositorio.
+Versión en **Angular 22** con estilos en **Tailwind CSS 4** del prototipo SITCO Aranda. Tiene 37 pantallas con datos de demostración.
 
-> Igual que el prototipo original, es una **simulación**: no hay servidor, base de datos ni nube reales. Todo corre en el navegador.
+> Es una **simulación**: no hay servidor, base de datos ni nube reales. Todo corre en el navegador.
 
 ## Cómo verlo
 
@@ -87,10 +87,3 @@ Cada pantalla es un componente con su `.ts` y su `.html`. Por ejemplo, `pages/op
   <ng-template appCell="estado" let-r><app-estado [v]="r.estado" /></ng-template>
 </app-data-table>
 ```
-
-## Diferencias con la versión en HTML
-
-- **Objetivos táctiles de 44 × 44 px** también en los encabezados de columna, las casillas de fila, las fichas de camión del despacho y el cierre de notificaciones (pendiente acordado el 5 de noviembre).
-- **Pausar movimiento** en el mapa de despacho del Centro de control (WCAG 2.2.2). Parte pausado si el sistema pide reducir animaciones.
-
-Todo lo demás se comporta igual: perfiles y permisos, simulador de nube, asistentes, validaciones, exportaciones y recorrido guiado.

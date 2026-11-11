@@ -15,9 +15,6 @@ jobs:
       - name: Descargar el repositorio
         uses: actions/checkout@v4
 
-      - name: Revisar archivos del prototipo HTML
-        run: test -f index.html && test -d js && test -d css
-
       - name: Instalar Node.js
         uses: actions/setup-node@v4
         with:

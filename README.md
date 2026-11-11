@@ -5,13 +5,13 @@ Prototipo navegable para la propuesta de la Compañía Minera Altos de Aranda S.
 
 > Es una **simulación**: no hay servidor, base de datos ni nube reales. Todo corre en el navegador con datos de demostración, para mostrar cómo se vería y cómo se comportaría la plataforma.
 
-> **Estado (7 de noviembre de 2026).** La raíz del repositorio es la versión de referencia del prototipo, en HTML. La versión en Angular está en [`sitco-angular/`](sitco-angular). Los cambios de contenido acordados el 5 de noviembre (botonera, nombre SITCO Aranda, límite de arsénico y ayudas emergentes) están en las dos versiones; los de estilos y comportamiento, solo en la de Angular (ver [Cambios acordados pendientes](#cambios-acordados-pendientes)). El 7 de noviembre se agregaron las piezas que faltaban para calzar con los módulos de la solución, se corrigió el diseño responsivo y se hizo la versión en Angular.
+> **Estado (10 de noviembre de 2026).** El prototipo es la versión en Angular, que está en [`sitco-angular/`](sitco-angular). La versión anterior en HTML se conserva en la rama `respaldo-html`.
 
 ---
 
 ## Cómo verlo
 
-1. Abre `index.html` con doble clic (Chrome o Edge). No requiere instalar nada ni conexión a internet, salvo las tipografías de Google Fonts.
+1. Entra a la dirección publicada o ejecútalo en tu computador (ver [Cómo ejecutarlo](#cómo-ejecutarlo)). Funciona en Chrome o Edge y solo necesita internet para las tipografías de Google Fonts.
 2. En el login pulsa **"Explorar como evaluador"**, o elige un perfil de demostración. El operador de pala no inicia sesión: se ve desde "Explorar como evaluador" o con "Cambiar de perfil" en el menú de usuario.
 3. Con el botón **"Simular nube"** (abajo a la izquierda) puedes cortar la fibra o crear una sombra de cobertura y ver cómo reacciona la plataforma.
 
@@ -21,11 +21,11 @@ Prototipo navegable para la propuesta de la Compañía Minera Altos de Aranda S.
 | Código de segundo factor (OTP) | `123456` |
 | Código de recuperación de cuenta | `482913` |
 
-Aún no está publicado. Si se habilita GitHub Pages desde la rama `prototipo`, la dirección sería `https://overfore.github.io/ERP-Mineria/`.
+Dirección publicada: `https://sitco-aranda.up.railway.app`. Railway debe compilar la carpeta `sitco-angular` con `npm run build` y servir `dist/sitco-angular/browser`.
 
-### Versión en Angular
+### Cómo ejecutarlo
 
-La carpeta [`sitco-angular/`](sitco-angular) tiene el mismo prototipo hecho en **Angular 22** con estilos en **Tailwind CSS 4**: las mismas 37 pantallas, organizadas en páginas y componentes reutilizables. Para verla:
+El prototipo está hecho en **Angular 22** con estilos en **Tailwind CSS 4**: 37 pantallas organizadas en páginas y componentes reutilizables. Requiere Node.js 22 o superior. Para verlo:
 
 ```bash
 cd sitco-angular
@@ -33,13 +33,13 @@ npm install
 npm start
 ```
 
-y abre `http://localhost:4200`. Su estructura y sus diferencias se explican en [`sitco-angular/README.md`](sitco-angular/README.md).
+y abre `http://localhost:4200`. Su estructura se explica en [`sitco-angular/README.md`](sitco-angular/README.md).
 
 ---
 
 ## Qué hicimos
 
-Una aplicación web de una sola página (HTML, CSS y JavaScript puros, sin dependencias ni compilación) con:
+Una aplicación web de una sola página, hecha en Angular 22 con Tailwind CSS 4, con:
 
 - **9 perfiles de usuario** con menú, inicio y permisos propios: operador de pala, supervisor de turno, planificación, metalurgia, seguridad, sustentabilidad, contratista, gerencia y administración TI. Si un perfil entra a una sección que no le corresponde, ve "Acceso restringido": es el control de acceso por roles.
 - **Trazabilidad de lotes** de la mina al embarque, con reconstrucción del origen de cada lote, ciclo completo y una excepción por arsénico.
@@ -85,8 +85,8 @@ Decidimos **simular** en vez de construir un sistema real, porque lo que se eval
 | RT-25.03 WCAG 2.2 AA | Parcial. Ver [Accesibilidad](#accesibilidad). |
 | RT-25.04 Responsivo | Sí: sin desborde horizontal en 1920 × 1080, 1366 × 768, 1024 × 768, 768 × 1024 y 375 × 812, revisado pantalla por pantalla el 7 de noviembre de 2026. |
 | RT-25.05 Sistema de diseño | Sí: pantalla `/sistema-diseno` con cinco colores base y dos familias tipográficas. |
-| RT-25.06 Enlace navegable en línea | Pendiente: aún no está publicado. |
-| RT-25.07 Acceso por 6 meses | Pendiente: depende de la publicación. |
+| RT-25.06 Enlace navegable en línea | Sí: `https://sitco-aranda.up.railway.app`. |
+| RT-25.07 Acceso por 6 meses | Pendiente: confirmar que el plan de Railway lo garantice. |
 | RT-25.08 Interactividad simulada | Sí: navegación completa, ingreso y validación simulados, carga de archivos, desplegables y estados. |
 | RT-25.09 Arquitectura de información | Sí: pantalla `/arquitectura-informacion` con mapa del sitio, diagrama de navegación, taxonomía y menús por perfil. |
 | RT-25.10 Exportación a documento interactivo (deseable) | No. |
@@ -137,7 +137,7 @@ Qué se hace con los sistemas que la compañía ya tiene:
 
 - **Todos los datos son ficticios.** Empresa, personas, lotes, equipos y cifras son de demostración.
 - El **límite de arsénico (0,40 %)** es ilustrativo y se alinea con el Anexo del Subdocumento 13, que aclara que el caso no entrega ese valor. Es un parámetro y se puede cambiar.
-- El nombre del producto es **SITCO Aranda**, como en los subdocumentos; **OVERFORE** es el nombre del equipo. Se cambian en un solo lugar (`H.BRAND`, en `js/data.js`).
+- El nombre del producto es **SITCO Aranda**, como en los subdocumentos; **OVERFORE** es el nombre del equipo. Se cambian en un solo lugar (`BRAND`, en `sitco-angular/src/app/core/data.ts`).
 - Se asume que el **balance es la fuente de verdad** y que **SAP emite los documentos**; el prototipo no reemplaza a SAP.
 - **No muestra verificación facial.** El caso declara una objeción sindical a la biometría en portería, y el Subdocumento 3 deja la verificación facial sujeta a un acuerdo con el sindicato.
 - Las exportaciones a PDF y XLSX son simuladas; el CSV descarga datos solo en las pantallas que lo entregan.
@@ -147,17 +147,9 @@ Qué se hace con los sistemas que la compañía ya tiene:
 ## Estructura
 
 ```
-index.html          Entrada de la aplicación
-css/styles.css      Sistema de diseño y componentes
-css/control.css     Estilos del centro de control
-js/core.js          Utilidades, componentes, validaciones y gráficos
-js/data.js          Datos de demostración, perfiles y menú
-js/sim.js           Simulación de conectividad (equipo → Nodo de Faena → nube)
-js/app.js           Enrutador, estructura general y recorrido guiado
-js/views-*.js       Pantallas por área (públicas, operación, personas, administración, documentación, centro de control)
-js/views-modulos.js Integrador de sistemas, perforación, consola de portería y marca de módulo
-sitco-angular/      El mismo prototipo en Angular 22 con Tailwind CSS 4 (páginas y componentes)
+sitco-angular/      El prototipo en Angular 22 con Tailwind CSS 4 (páginas y componentes)
 antecedentes/       Documentos de referencia: correo, documentos de la solución, bases e imágenes
+.github/workflows/  Pipeline de CI: compila la versión Angular en cada push a la rama prototipo
 ```
 
 ## Accesibilidad
@@ -170,18 +162,16 @@ Comprobado hasta ahora:
 - **Contraste:** una revisión automática de esas pantallas no encontró textos bajo el mínimo. Los contrastes de la paleta coinciden con los que declara la página de sistema de diseño.
 - **Objetivos táctiles:** en 1366 px se cumplen en la mayoría de las pantallas.
 
-No está comprobado: el uso con un lector de pantalla real, el modo de alto contraste y el texto ampliable en pantalla, ni el funcionamiento por doble clic desde `file://`.
-
-## Cambios acordados pendientes
-
-Acordados el 5 de noviembre de 2026 para la versión Angular. Ya están hechos en [`sitco-angular/`](sitco-angular); en esta versión en HTML siguen pendientes.
-
-1. **Objetivos táctiles de 44 × 44 px** en todos los controles, incluidos los encabezados de columna de las tablas, las casillas de fila, las fichas de camión del mapa y el cierre de notificaciones.
-2. **Pausa del movimiento** del mapa de despacho (WCAG 2.2.2, nivel A): un botón "Pausar movimiento", y el mapa parte pausado si el sistema pide reducir animaciones.
+No está comprobado: el uso con un lector de pantalla real, el modo de alto contraste y el texto ampliable en pantalla.
 
 ## Cambios acordados ya implementados
 
-Hechos el 5 y 6 de noviembre de 2026 en este código.
+Acordados el 5 de noviembre de 2026 y hechos en Angular:
+
+- **Objetivos táctiles de 44 × 44 px** en todos los controles, incluidos los encabezados de columna de las tablas, las casillas de fila, las fichas de camión del mapa y el cierre de notificaciones.
+- **Pausa del movimiento** del mapa de despacho (WCAG 2.2.2, nivel A): un botón "Pausar movimiento", y el mapa parte pausado si el sistema pide reducir animaciones.
+
+Hechos el 5 y 6 de noviembre de 2026.
 
 - **Botonera de Pala** como en la Figura 3.10 del Subdocumento 3: cuatro botones de destino, luz del plan, luz de registrado y toque de credencial simulado, sin PIN ni pantalla. Se quitaron "Detención" y "Aviso de falla" de la vista del operador (RNF-USA-008 y RNF-USA-009). Sin toque de credencial, el registro queda como "operador no identificado" (RF-ACR-011).
 - **Login:** el flujo de credencial más PIN entra como supervisor. El operador no inicia sesión.
